@@ -1,0 +1,1135 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quiz Redes de Computadores</title>
+</head>
+<body>
+
+  <div class="container">
+    <div><button><a href="index.html" style="text-decoration: none; padding: 10px;"> 👈🏼 Voltar</a></button></div>
+    <header>
+      <h1>Quiz - Redes de Computadores</h1>
+
+      <div class="info">
+        <div class="score-box">
+          Pontuação: <span id="score">0</span>
+        </div>
+
+        <div class="question-count">
+          Pergunta <span id="currentQuestion">1</span> /
+          <span id="totalQuestions">0</span>
+        </div>
+      </div>
+    </header>
+
+    <main class="quiz-box">
+
+      <div class="progress-container">
+        <div class="progress" id="progress"></div>
+      </div>
+
+      <h2 id="question">Pergunta aqui</h2>
+
+      <div id="answers" class="answers"></div>
+
+      <div id="feedbackBox" class="feedback hidden"></div>
+
+      <button id="nextBtn">Próxima Pergunta</button>
+
+    </main>
+
+    <section id="resultBox" class="result hidden">
+      <h2>Quiz Finalizado</h2>
+
+      <p id="finalScore"></p>
+
+      <button onclick="restartQuiz()">
+        Reiniciar Quiz
+      </button>
+    </section>
+
+  </div>
+  <style>
+            /* style.css */
+
+        *{
+        margin:0;
+        padding:0;
+        box-sizing:border-box;
+        font-family:Arial, Helvetica, sans-serif;
+        }
+
+        body{
+        background:#0f172a;
+        color:white;
+        min-height:100vh;
+        display:flex;
+        justify-content:center;
+        align-items:center;
+        padding:20px;
+        }
+
+        .container{
+        width:100%;
+        max-width:900px;
+        }
+
+        header{
+        margin-bottom:20px;
+        }
+
+        header h1{
+        text-align:center;
+        margin-bottom:20px;
+        font-size:32px;
+        }
+
+        .info{
+        display:flex;
+        justify-content:space-between;
+        gap:15px;
+        }
+
+        .score-box,
+        .question-count{
+        background:#1e293b;
+        padding:15px;
+        border-radius:12px;
+        width:100%;
+        text-align:center;
+        font-weight:bold;
+        }
+
+        .quiz-box{
+        background:#1e293b;
+        padding:30px;
+        border-radius:20px;
+        box-shadow:0 0 25px rgba(0,0,0,0.4);
+        }
+
+        .progress-container{
+        width:100%;
+        height:10px;
+        background:#334155;
+        border-radius:20px;
+        overflow:hidden;
+        margin-bottom:25px;
+        }
+
+        .progress{
+        width:0%;
+        height:100%;
+        background:#38bdf8;
+        transition:0.3s;
+        }
+
+        #question{
+        margin-bottom:25px;
+        line-height:1.6;
+        }
+
+        .answers{
+        display:flex;
+        flex-direction:column;
+        gap:15px;
+        }
+
+        .answer-btn{
+        background:#334155;
+        border:none;
+        color:white;
+        padding:15px;
+        border-radius:12px;
+        cursor:pointer;
+        transition:0.2s;
+        text-align:left;
+        font-size:16px;
+        }
+
+        .answer-btn:hover{
+        background:#475569;
+        }
+
+        .correct{
+        background:#15803d !important;
+        }
+
+        .wrong{
+        background:#b91c1c !important;
+        }
+
+        .feedback{
+        margin-top:25px;
+        background:#0f172a;
+        border-left:5px solid #38bdf8;
+        padding:20px;
+        border-radius:12px;
+        line-height:1.7;
+        }
+
+        .feedback h3{
+        margin-bottom:10px;
+        }
+
+        .feedback.correct-feedback{
+        border-left-color:#22c55e;
+        }
+
+        .feedback.wrong-feedback{
+        border-left-color:#ef4444;
+        }
+
+        #nextBtn{
+        margin-top:25px;
+        width:100%;
+        padding:15px;
+        border:none;
+        border-radius:12px;
+        background:#38bdf8;
+        color:white;
+        font-size:16px;
+        cursor:pointer;
+        display:none;
+        }
+
+        #nextBtn:hover{
+        opacity:0.9;
+        }
+
+        .result{
+        background:#1e293b;
+        padding:40px;
+        border-radius:20px;
+        text-align:center;
+        }
+
+        .result h2{
+        margin-bottom:20px;
+        }
+
+        .result p{
+        font-size:20px;
+        }
+
+        .result button{
+        margin-top:25px;
+        padding:15px 25px;
+        border:none;
+        border-radius:12px;
+        background:#38bdf8;
+        color:white;
+        cursor:pointer;
+        font-size:16px;
+        }
+
+        .hidden{
+        display:none;
+        }
+
+        @media(max-width:700px){
+
+        .info{
+            flex-direction:column;
+        }
+
+        }
+  </style>
+
+  <script>
+            // script.js
+
+        const questions = [
+
+        {
+        question: "Qual é a principal função da camada de transporte?",
+
+        answers: [
+        {text:"Fornecer comunicação confiável fim a fim", correct:true},
+        {text:"Criar cabos de rede", correct:false},
+        {text:"Controlar sinais elétricos", correct:false},
+        {text:"Controlar roteadores", correct:false}
+        ],
+
+        explanation: `
+        A camada de transporte é responsável pela comunicação
+        fim a fim entre dispositivos.
+
+        Ela garante:
+        • controle de fluxo
+        • controle de erros
+        • segmentação de dados
+        • confiabilidade na transmissão
+
+        Os principais protocolos dessa camada são TCP e UDP.
+        `
+        },
+
+        {
+        question: "Qual protocolo garante entrega confiável dos dados?",
+
+        answers: [
+        {text:"UDP", correct:false},
+        {text:"DNS", correct:false},
+        {text:"TCP", correct:true},
+        {text:"DHCP", correct:false}
+        ],
+
+        explanation: `
+        O TCP (Transmission Control Protocol) é um protocolo confiável.
+
+        Ele garante:
+        • entrega correta
+        • ordem dos pacotes
+        • retransmissão em caso de perda
+        • controle de fluxo
+
+        Muito usado em:
+        • HTTPS
+        • FTP
+        • envio de emails
+        `
+        },
+
+        {
+        question: "Qual protocolo é mais rápido porém não confiável?",
+
+        answers: [
+        {text:"TCP", correct:false},
+        {text:"UDP", correct:true},
+        {text:"HTTP", correct:false},
+        {text:"SMTP", correct:false}
+        ],
+
+        explanation: `
+        O UDP é um protocolo leve e rápido.
+
+        Ele NÃO garante:
+        • entrega
+        • ordem
+        • retransmissão
+
+        Por isso é usado em:
+        • streaming
+        • jogos online
+        • chamadas de vídeo
+        • VoIP
+
+        A velocidade é priorizada em vez da confiabilidade.
+        `
+        },
+
+        {
+        question: "Qual a função do DHCP?",
+
+        answers: [
+        {text:"Traduzir domínios", correct:false},
+        {text:"Distribuir IP automaticamente", correct:true},
+        {text:"Enviar emails", correct:false},
+        {text:"Criar páginas web", correct:false}
+        ],
+
+        explanation: `
+        DHCP significa Dynamic Host Configuration Protocol.
+
+        Sua função é atribuir automaticamente:
+        • endereço IP
+        • máscara de rede
+        • gateway
+        • DNS
+
+        Isso evita configuração manual e reduz erros.
+        `
+        },
+
+        {
+        question: "Qual é a sequência correta do processo DORA?",
+
+        answers: [
+        {text:"Discover, Offer, Request, ACK", correct:true},
+        {text:"ACK, Offer, Request, Discover", correct:false},
+        {text:"Offer, ACK, Discover, Request", correct:false},
+        {text:"Request, Discover, Offer, ACK", correct:false}
+        ],
+
+        explanation: `
+        O processo DORA funciona assim:
+
+        1. Discover
+        O cliente procura um servidor DHCP.
+
+        2. Offer
+        O servidor oferece um IP.
+
+        3. Request
+        O cliente solicita aquele IP.
+
+        4. ACK
+        O servidor confirma a liberação do IP.
+        `
+        },
+
+        {
+        question: "Qual protocolo traduz nomes de domínio em IP?",
+
+        answers: [
+        {text:"SMTP", correct:false},
+        {text:"DNS", correct:true},
+        {text:"TCP", correct:false},
+        {text:"FTP", correct:false}
+        ],
+
+        explanation: `
+        O DNS funciona como uma agenda telefônica da internet.
+
+        Ele converte:
+        www.google.com
+
+        em:
+
+        142.xxx.xxx.xxx
+
+        Sem DNS precisaríamos decorar IPs dos sites.
+        `
+        },
+
+        {
+        question: "Qual camada do modelo OSI é chamada de tradutora?",
+
+        answers: [
+        {text:"Camada Física", correct:false},
+        {text:"Camada de Rede", correct:false},
+        {text:"Camada de Apresentação", correct:true},
+        {text:"Camada de Sessão", correct:false}
+        ],
+
+        explanation: `
+        A camada de apresentação traduz os dados entre sistemas diferentes.
+
+        Ela também realiza:
+        • criptografia
+        • descriptografia
+        • compressão
+        • conversão de formatos
+
+        Ela garante que os sistemas consigam entender os dados transmitidos.
+        `
+        },
+
+        {
+        question: "Qual função pertence à camada de apresentação?",
+
+        answers: [
+        {text:"Criptografia", correct:true},
+        {text:"Roteamento", correct:false},
+        {text:"Endereçamento IP", correct:false},
+        {text:"Controle elétrico", correct:false}
+        ],
+
+        explanation: `
+        A criptografia protege os dados durante a transmissão.
+
+        A camada de apresentação:
+        • criptografa antes do envio
+        • descriptografa no destino
+
+        Isso aumenta a segurança da comunicação.
+        `
+        },
+
+        {
+        question: "Qual camada fornece serviços diretamente ao usuário?",
+
+        answers: [
+        {text:"Camada Física", correct:false},
+        {text:"Camada de Aplicação", correct:true},
+        {text:"Camada de Rede", correct:false},
+        {text:"Camada de Sessão", correct:false}
+        ],
+
+        explanation: `
+        A camada de aplicação é a camada mais próxima do usuário.
+
+        Ela fornece serviços usados por aplicações como:
+        • navegadores
+        • emails
+        • FTP
+        • DNS
+
+        Exemplo:
+        Quando você acessa um site, o navegador utiliza HTTP nessa camada.
+        `
+        },
+
+        {
+        question: "Qual protocolo é usado para navegação web?",
+
+        answers: [
+        {text:"FTP", correct:false},
+        {text:"HTTP", correct:true},
+        {text:"SMTP", correct:false},
+        {text:"DHCP", correct:false}
+        ],
+
+        explanation: `
+        HTTP significa HyperText Transfer Protocol.
+
+        Ele é responsável pela comunicação entre:
+        • navegador
+        • servidor web
+
+        HTTPS é a versão segura do HTTP.
+        `
+        },
+        {
+        question: "Qual é a principal função da camada de transporte?",
+        answers: [
+        {text:"Garantir comunicação fim a fim", correct:true},
+        {text:"Criar IPs", correct:false},
+        {text:"Controlar cabos", correct:false},
+        {text:"Traduzir DNS", correct:false}
+        ],
+        explanation: `
+        A camada de transporte fornece comunicação confiável
+        entre dispositivos diferentes.
+
+        Ela realiza:
+        • controle de fluxo
+        • controle de erros
+        • segmentação
+        • remontagem dos dados
+        `
+        },
+
+        {
+        question: "Qual protocolo é confiável?",
+        answers: [
+        {text:"UDP", correct:false},
+        {text:"TCP", correct:true},
+        {text:"DNS", correct:false},
+        {text:"DHCP", correct:false}
+        ],
+        explanation: `
+        O TCP garante:
+        • entrega dos dados
+        • ordem correta
+        • retransmissão em caso de falhas
+        `
+        },
+
+        {
+        question: "Qual protocolo NÃO garante entrega?",
+        answers: [
+        {text:"TCP", correct:false},
+        {text:"HTTP", correct:false},
+        {text:"UDP", correct:true},
+        {text:"SMTP", correct:false}
+        ],
+        explanation: `
+        UDP é rápido e leve, mas não garante:
+        • entrega
+        • ordem
+        • retransmissão
+        `
+        },
+
+        {
+        question: "Qual aplicação normalmente usa UDP?",
+        answers: [
+        {text:"Streaming", correct:true},
+        {text:"FTP", correct:false},
+        {text:"HTTPS", correct:false},
+        {text:"SMTP", correct:false}
+        ],
+        explanation: `
+        Streaming usa UDP porque velocidade é mais importante
+        que confiabilidade total.
+        `
+        },
+
+        {
+        question: "O TCP utiliza qual processo para iniciar conexão?",
+        answers: [
+        {text:"DORA", correct:false},
+        {text:"Three-way handshake", correct:true},
+        {text:"ARP", correct:false},
+        {text:"DNS Lookup", correct:false}
+        ],
+        explanation: `
+        O TCP utiliza o three-way handshake para estabelecer
+        uma conexão segura e confiável.
+        `
+        },
+
+        {
+        question: "Qual camada do modelo OSI é a camada 4?",
+        answers: [
+        {text:"Aplicação", correct:false},
+        {text:"Transporte", correct:true},
+        {text:"Sessão", correct:false},
+        {text:"Rede", correct:false}
+        ],
+        explanation: `
+        A camada de transporte é a quarta camada do modelo OSI.
+        `
+        },
+
+        {
+        question: "Qual protocolo é usado em HTTPS?",
+        answers: [
+        {text:"UDP", correct:false},
+        {text:"TCP", correct:true},
+        {text:"ICMP", correct:false},
+        {text:"ARP", correct:false}
+        ],
+        explanation: `
+        HTTPS utiliza TCP porque precisa de confiabilidade.
+        `
+        },
+
+        {
+        question: "O que significa DHCP?",
+        answers: [
+        {text:"Dynamic Host Configuration Protocol", correct:true},
+        {text:"Domain Host Control Process", correct:false},
+        {text:"Digital Hyper Control Protocol", correct:false},
+        {text:"Data Host Connection Program", correct:false}
+        ],
+        explanation: `
+        DHCP é o protocolo responsável pela configuração
+        automática de IPs.
+        `
+        },
+
+        {
+        question: "Qual a função do DHCP?",
+        answers: [
+        {text:"Traduzir domínios", correct:false},
+        {text:"Distribuir IP automaticamente", correct:true},
+        {text:"Enviar emails", correct:false},
+        {text:"Criar páginas web", correct:false}
+        ],
+        explanation: `
+        O DHCP distribui automaticamente:
+        • IP
+        • máscara
+        • gateway
+        • DNS
+        `
+        },
+
+        {
+        question: "Qual processo pertence ao DHCP?",
+        answers: [
+        {text:"DORA", correct:true},
+        {text:"ARP", correct:false},
+        {text:"SMTP", correct:false},
+        {text:"HTTP", correct:false}
+        ],
+        explanation: `
+        O DHCP utiliza o processo DORA:
+        Discover
+        Offer
+        Request
+        ACK
+        `
+        },
+
+        {
+        question: "O que significa a letra D do DORA?",
+        answers: [
+        {text:"Download", correct:false},
+        {text:"Discover", correct:true},
+        {text:"Domain", correct:false},
+        {text:"Data", correct:false}
+        ],
+        explanation: `
+        Discover é a fase onde o cliente procura
+        um servidor DHCP.
+        `
+        },
+
+        {
+        question: "Qual etapa do DORA oferece um IP?",
+        answers: [
+        {text:"Offer", correct:true},
+        {text:"ACK", correct:false},
+        {text:"Request", correct:false},
+        {text:"Discover", correct:false}
+        ],
+        explanation: `
+        Offer é quando o servidor oferece um endereço IP.
+        `
+        },
+
+        {
+        question: "Qual etapa confirma o uso do IP?",
+        answers: [
+        {text:"ACK", correct:true},
+        {text:"Discover", correct:false},
+        {text:"Request", correct:false},
+        {text:"Offer", correct:false}
+        ],
+        explanation: `
+        ACK confirma oficialmente a utilização do IP.
+        `
+        },
+
+        {
+        question: "Qual protocolo traduz nomes em IP?",
+        answers: [
+        {text:"DNS", correct:true},
+        {text:"FTP", correct:false},
+        {text:"SMTP", correct:false},
+        {text:"UDP", correct:false}
+        ],
+        explanation: `
+        DNS converte domínios em endereços IP.
+        `
+        },
+
+        {
+        question: "O DNS é conhecido como:",
+        answers: [
+        {text:"Agenda telefônica da internet", correct:true},
+        {text:"Firewall da internet", correct:false},
+        {text:"Protocolo de email", correct:false},
+        {text:"Servidor físico", correct:false}
+        ],
+        explanation: `
+        O DNS funciona como uma agenda telefônica,
+        localizando IPs através de nomes.
+        `
+        },
+
+        {
+        question: "Qual comando testa DNS?",
+        answers: [
+        {text:"ping", correct:false},
+        {text:"nslookup", correct:true},
+        {text:"tracert", correct:false},
+        {text:"format", correct:false}
+        ],
+        explanation: `
+        nslookup é utilizado para consultar DNS.
+        `
+        },
+
+        {
+        question: "Qual camada OSI é responsável pelas sessões?",
+        answers: [
+        {text:"Sessão", correct:true},
+        {text:"Rede", correct:false},
+        {text:"Aplicação", correct:false},
+        {text:"Física", correct:false}
+        ],
+        explanation: `
+        A camada de sessão cria, mantém e encerra sessões.
+        `
+        },
+
+        {
+        question: "Qual camada utiliza checkpoints?",
+        answers: [
+        {text:"Sessão", correct:true},
+        {text:"Física", correct:false},
+        {text:"Rede", correct:false},
+        {text:"Enlace", correct:false}
+        ],
+        explanation: `
+        A camada de sessão pode utilizar checkpoints
+        para recuperação de falhas.
+        `
+        },
+
+        {
+        question: "Qual camada encerra sessões?",
+        answers: [
+        {text:"Sessão", correct:true},
+        {text:"Aplicação", correct:false},
+        {text:"Rede", correct:false},
+        {text:"Transporte", correct:false}
+        ],
+        explanation: `
+        Ela encerra a comunicação liberando recursos.
+        `
+        },
+
+        {
+        question: "Qual camada é chamada de tradutora?",
+        answers: [
+        {text:"Apresentação", correct:true},
+        {text:"Aplicação", correct:false},
+        {text:"Rede", correct:false},
+        {text:"Física", correct:false}
+        ],
+        explanation: `
+        A camada de apresentação traduz formatos
+        de dados entre sistemas.
+        `
+        },
+
+        {
+        question: "Qual função pertence à camada de apresentação?",
+        answers: [
+        {text:"Criptografia", correct:true},
+        {text:"Roteamento", correct:false},
+        {text:"Controle elétrico", correct:false},
+        {text:"Distribuição de IP", correct:false}
+        ],
+        explanation: `
+        A camada de apresentação realiza:
+        • criptografia
+        • compressão
+        • tradução de formatos
+        `
+        },
+
+        {
+        question: "Qual camada realiza compressão de dados?",
+        answers: [
+        {text:"Apresentação", correct:true},
+        {text:"Rede", correct:false},
+        {text:"Física", correct:false},
+        {text:"Sessão", correct:false}
+        ],
+        explanation: `
+        Ela reduz o tamanho dos dados antes da transmissão.
+        `
+        },
+
+        {
+        question: "Qual camada descriptografa dados?",
+        answers: [
+        {text:"Apresentação", correct:true},
+        {text:"Aplicação", correct:false},
+        {text:"Rede", correct:false},
+        {text:"Transporte", correct:false}
+        ],
+        explanation: `
+        Os dados são descriptografados no destino
+        pela camada de apresentação.
+        `
+        },
+
+        {
+        question: "Qual camada fornece serviços diretamente ao usuário?",
+        answers: [
+        {text:"Aplicação", correct:true},
+        {text:"Rede", correct:false},
+        {text:"Enlace", correct:false},
+        {text:"Física", correct:false}
+        ],
+        explanation: `
+        A camada de aplicação interage diretamente
+        com softwares do usuário.
+        `
+        },
+
+        {
+        question: "Qual protocolo pertence à camada de aplicação?",
+        answers: [
+        {text:"HTTP", correct:true},
+        {text:"ARP", correct:false},
+        {text:"ICMP", correct:false},
+        {text:"MAC", correct:false}
+        ],
+        explanation: `
+        HTTP é utilizado para navegação web.
+        `
+        },
+
+        {
+        question: "Qual protocolo envia emails?",
+        answers: [
+        {text:"SMTP", correct:true},
+        {text:"FTP", correct:false},
+        {text:"DNS", correct:false},
+        {text:"UDP", correct:false}
+        ],
+        explanation: `
+        SMTP é utilizado para envio de emails.
+        `
+        },
+
+        {
+        question: "Qual protocolo transfere arquivos?",
+        answers: [
+        {text:"FTP", correct:true},
+        {text:"SMTP", correct:false},
+        {text:"DNS", correct:false},
+        {text:"DHCP", correct:false}
+        ],
+        explanation: `
+        FTP é utilizado para transferência de arquivos.
+        `
+        },
+
+        {
+        question: "Qual protocolo é usado em páginas web?",
+        answers: [
+        {text:"HTTP", correct:true},
+        {text:"FTP", correct:false},
+        {text:"SMTP", correct:false},
+        {text:"SSH", correct:false}
+        ],
+        explanation: `
+        HTTP permite comunicação entre navegador
+        e servidor web.
+        `
+        },
+
+        {
+        question: "O HTTPS é:",
+        answers: [
+        {text:"HTTP seguro", correct:true},
+        {text:"DNS criptografado", correct:false},
+        {text:"Servidor físico", correct:false},
+        {text:"Sistema operacional", correct:false}
+        ],
+        explanation: `
+        HTTPS adiciona criptografia ao HTTP.
+        `
+        },
+
+        {
+        question: "Qual protocolo é ideal para jogos online?",
+        answers: [
+        {text:"UDP", correct:true},
+        {text:"TCP", correct:false},
+        {text:"FTP", correct:false},
+        {text:"SMTP", correct:false}
+        ],
+        explanation: `
+        Jogos utilizam UDP por causa da baixa latência.
+        `
+        },
+
+        {
+        question: "Qual camada controla o diálogo entre sistemas?",
+        answers: [
+        {text:"Sessão", correct:true},
+        {text:"Aplicação", correct:false},
+        {text:"Rede", correct:false},
+        {text:"Física", correct:false}
+        ],
+        explanation: `
+        A camada de sessão controla o fluxo
+        da comunicação entre dispositivos.
+        `
+        },
+
+        {
+        question: "Qual camada pode trabalhar com serialização?",
+        answers: [
+        {text:"Apresentação", correct:true},
+        {text:"Rede", correct:false},
+        {text:"Física", correct:false},
+        {text:"Transporte", correct:false}
+        ],
+        explanation: `
+        Ela pode serializar objetos complexos
+        para transmissão.
+        `
+        },
+
+        {
+        question: "Qual protocolo é mais leve?",
+        answers: [
+        {text:"UDP", correct:true},
+        {text:"TCP", correct:false},
+        {text:"HTTP", correct:false},
+        {text:"FTP", correct:false}
+        ],
+        explanation: `
+        UDP possui menos mecanismos de controle,
+        por isso é mais leve e rápido.
+        `
+        }
+
+        ];
+
+        let currentQuestion = 0;
+        let score = 0;
+
+        let shuffledQuestions = questions.sort(() => Math.random() - 0.5);
+
+        const questionElement = document.getElementById("question");
+        const answersElement = document.getElementById("answers");
+        const scoreElement = document.getElementById("score");
+        const nextBtn = document.getElementById("nextBtn");
+        const feedbackBox = document.getElementById("feedbackBox");
+        const progress = document.getElementById("progress");
+
+        document.getElementById("totalQuestions").innerText =
+        shuffledQuestions.length;
+
+        function showQuestion(){
+
+        resetState();
+
+        const current = shuffledQuestions[currentQuestion];
+
+        document.getElementById("currentQuestion").innerText =
+        currentQuestion + 1;
+
+        questionElement.innerText = current.question;
+
+        current.answers.forEach(answer => {
+
+        const button = document.createElement("button");
+
+        button.innerText = answer.text;
+
+        button.classList.add("answer-btn");
+
+        if(answer.correct){
+        button.dataset.correct = answer.correct;
+        }
+
+        button.addEventListener("click", selectAnswer);
+
+        answersElement.appendChild(button);
+
+        });
+
+        updateProgress();
+
+        }
+
+        function resetState(){
+
+        nextBtn.style.display = "none";
+
+        answersElement.innerHTML = "";
+
+        feedbackBox.classList.add("hidden");
+
+        feedbackBox.innerHTML = "";
+
+        feedbackBox.classList.remove(
+        "correct-feedback",
+        "wrong-feedback"
+        );
+
+        }
+
+        function selectAnswer(e){
+
+        const selectedBtn = e.target;
+
+        const correct = selectedBtn.dataset.correct === "true";
+
+        if(correct){
+
+        selectedBtn.classList.add("correct");
+
+        score++;
+
+        scoreElement.innerText = score;
+
+        feedbackBox.classList.add("correct-feedback");
+
+        feedbackBox.innerHTML = `
+        <h3>✅ Resposta Correta</h3>
+        <p>${shuffledQuestions[currentQuestion].explanation}</p>
+        `;
+
+        }else{
+
+        selectedBtn.classList.add("wrong");
+
+        feedbackBox.classList.add("wrong-feedback");
+
+        feedbackBox.innerHTML = `
+        <h3>❌ Resposta Errada</h3>
+        <p>${shuffledQuestions[currentQuestion].explanation}</p>
+        `;
+
+        }
+
+        feedbackBox.classList.remove("hidden");
+
+        Array.from(answersElement.children).forEach(button => {
+
+        if(button.dataset.correct === "true"){
+        button.classList.add("correct");
+        }
+
+        button.disabled = true;
+
+        });
+
+        nextBtn.style.display = "block";
+
+        }
+
+        function updateProgress(){
+
+        const percent =
+        ((currentQuestion) / shuffledQuestions.length) * 100;
+
+        progress.style.width = percent + "%";
+
+        }
+
+        nextBtn.addEventListener("click", () => {
+
+        currentQuestion++;
+
+        if(currentQuestion < shuffledQuestions.length){
+
+        showQuestion();
+
+        }else{
+
+        showResult();
+
+        }
+
+        });
+
+        function showResult(){
+
+        document.querySelector(".quiz-box")
+        .classList.add("hidden");
+
+        document.getElementById("resultBox")
+        .classList.remove("hidden");
+
+        document.getElementById("finalScore").innerHTML =
+        `
+        Você acertou <strong>${score}</strong> de
+        <strong>${shuffledQuestions.length}</strong> perguntas.
+        `;
+
+        }
+
+        function restartQuiz(){
+
+        currentQuestion = 0;
+
+        score = 0;
+
+        scoreElement.innerText = 0;
+
+        shuffledQuestions =
+        questions.sort(() => Math.random() - 0.5);
+
+        document.querySelector(".quiz-box")
+        .classList.remove("hidden");
+
+        document.getElementById("resultBox")
+        .classList.add("hidden");
+
+        showQuestion();
+
+        }
+
+        showQuestion();
+  </script>
+
+</body>
+</html>

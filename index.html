@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Revisão – Redes de Computadores</title>
+<style>
+  :root {
+    --bg: #0f172a;
+    --surface: #1e293b;
+    --surface2: #273248;
+    --accent: #38bdf8;
+    --accent2: #818cf8;
+    --green: #4ade80;
+    --red: #f87171;
+    --yellow: #fbbf24;
+    --text: #e2e8f0;
+    --muted: #94a3b8;
+    --border: #334155;
+    --radius: 12px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; min-height: 100vh; }
+
+  /* ---------- NAV ---------- */
+  nav { background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 24px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; position: sticky; top: 0; z-index: 100; }
+  nav h1 { font-size: 1rem; font-weight: 700; color: var(--accent); padding: 14px 0; margin-right: 16px; }
+  .tab { background: none; border: none; color: var(--muted); padding: 16px 14px; cursor: pointer; font-size: .85rem; font-weight: 600; border-bottom: 3px solid transparent; transition: all .2s; white-space: nowrap; }
+  .tab:hover { color: var(--text); }
+  .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+  /* ---------- LAYOUT ---------- */
+  .page { display: none; padding: 32px 24px; max-width: 860px; margin: 0 auto; }
+  .page.active { display: block; }
+
+  /* ---------- REVIEW CARDS ---------- */
+  .section-title { font-size: 1.3rem; font-weight: 700; color: var(--accent); margin-bottom: 20px; padding-bottom: 8px; border-bottom: 2px solid var(--border); }
+  .review-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px 24px; margin-bottom: 16px; }
+  .review-card h3 { font-size: 1rem; font-weight: 700; color: var(--accent2); margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+  .review-card p, .review-card li { color: var(--text); font-size: .92rem; line-height: 1.7; }
+  .review-card ul { padding-left: 18px; }
+  .review-card li { margin-bottom: 4px; }
+  .tag { background: var(--accent2); color: #fff; font-size: .7rem; padding: 2px 8px; border-radius: 20px; font-weight: 600; }
+  .tag.green { background: #166534; color: var(--green); }
+  .tag.blue { background: #0c4a6e; color: var(--accent); }
+  .tag.purple { background: #3730a3; color: #a5b4fc; }
+  .tag.orange { background: #7c2d12; color: #fb923c; }
+
+  .osi-grid { display: grid; gap: 6px; margin-top: 10px; }
+  .osi-row { display: grid; grid-template-columns: 40px 1fr 1fr; gap: 8px; align-items: center; background: var(--surface2); border-radius: 8px; padding: 8px 12px; border-left: 4px solid; }
+  .osi-row span { font-size: .85rem; }
+  .osi-row .num { font-weight: 800; font-size: 1rem; }
+  .osi-row .proto { color: var(--muted); font-size: .78rem; }
+
+  /* ---------- QUIZ ---------- */
+  .quiz-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; flex-wrap: wrap; gap: 12px; }
+  .quiz-header h2 { font-size: 1.1rem; font-weight: 700; }
+  .progress-bar { background: var(--border); border-radius: 99px; height: 8px; flex: 1; min-width: 120px; overflow: hidden; }
+  .progress-fill { background: linear-gradient(90deg, var(--accent), var(--accent2)); height: 100%; border-radius: 99px; transition: width .4s; }
+  .score-badge { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 6px 14px; font-size: .85rem; font-weight: 700; color: var(--accent); }
+
+  .question-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; margin-bottom: 20px; }
+  .question-num { font-size: .78rem; color: var(--muted); font-weight: 600; margin-bottom: 8px; }
+  .question-text { font-size: 1rem; line-height: 1.6; margin-bottom: 18px; font-weight: 600; }
+  .options { display: flex; flex-direction: column; gap: 10px; }
+  .option { background: var(--surface2); border: 2px solid var(--border); border-radius: 10px; padding: 12px 16px; cursor: pointer; font-size: .9rem; line-height: 1.5; transition: all .2s; display: flex; gap: 10px; align-items: flex-start; }
+  .option:hover:not(.disabled) { border-color: var(--accent); color: var(--accent); }
+  .option.correct { border-color: var(--green); background: #052e16; color: var(--green); }
+  .option.wrong { border-color: var(--red); background: #2d0b0b; color: var(--red); }
+  .option.disabled { cursor: default; }
+  .opt-letter { font-weight: 800; min-width: 20px; }
+  .feedback { margin-top: 14px; padding: 12px 16px; border-radius: 8px; font-size: .88rem; line-height: 1.5; display: none; }
+  .feedback.show { display: block; }
+  .feedback.correct { background: #052e16; border: 1px solid var(--green); color: var(--green); }
+  .feedback.wrong { background: #2d0b0b; border: 1px solid var(--red); color: var(--red); }
+
+  .btn { background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #0f172a; border: none; border-radius: 8px; padding: 10px 22px; font-weight: 700; font-size: .9rem; cursor: pointer; transition: opacity .2s; }
+  .btn:hover { opacity: .85; }
+  .btn.secondary { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
+
+  .result-box { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 32px; text-align: center; }
+  .result-box .big-score { font-size: 4rem; font-weight: 900; background: linear-gradient(135deg, var(--accent), var(--accent2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .result-box p { color: var(--muted); margin-top: 8px; }
+  .result-box .actions { margin-top: 20px; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+
+  .filter-bar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
+  .filter-btn { background: var(--surface2); border: 1px solid var(--border); color: var(--muted); border-radius: 20px; padding: 6px 14px; font-size: .82rem; font-weight: 600; cursor: pointer; transition: all .2s; }
+  .filter-btn:hover, .filter-btn.active { background: var(--accent); color: #0f172a; border-color: var(--accent); }
+
+  @media(max-width:600px) {
+    .page { padding: 20px 14px; }
+    .osi-grid .osi-row { grid-template-columns: 32px 1fr; }
+    .osi-row .proto { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <h1>📡 Redes ADS</h1>
+  <button class="tab active" onclick="showPage('revisao')">📖 Revisão</button>
+  <button class="tab" onclick="showPage('quiz')">🧠 Teste para 1ª prova</button>
+  <button class="tab"><a href="teste_rede_prova_2.html" class="tab" style="text-decoration: none; background-color: #e3c154; color: black;">🧠 Teste da 2ª Prova 🧠</a></button>
+</nav>
+
+<!-- ======================== REVISÃO ======================== -->
+<div id="revisao" class="page active">
+
+  <p class="section-title">📖 Revisão Rápida do Conteúdo</p>
+
+  <!-- OSI -->
+  <div class="review-card">
+    <h3><span class="tag blue">Aula 00</span> Modelo OSI — As 7 Camadas</h3>
+    <p style="margin-bottom:12px;color:var(--muted);font-size:.88rem;">Lembre: <strong>"AAPTREFF"</strong> de baixo pra cima → Física, Enlace, Rede, Transporte, Sessão, Apresentação, Aplicação</p>
+    <div class="osi-grid">
+      <div class="osi-row" style="border-color:#f472b6"><span class="num" style="color:#f472b6">7</span><span>Aplicação</span><span class="proto">HTTP, FTP, DNS, DHCP, SMTP, SSH</span></div>
+      <div class="osi-row" style="border-color:#a78bfa"><span class="num" style="color:#a78bfa">6</span><span>Apresentação</span><span class="proto">SSL/TLS, criptografia, compressão</span></div>
+      <div class="osi-row" style="border-color:#818cf8"><span class="num" style="color:#818cf8">5</span><span>Sessão</span><span class="proto">Abertura/encerramento de sessões</span></div>
+      <div class="osi-row" style="border-color:#38bdf8"><span class="num" style="color:#38bdf8">4</span><span>Transporte</span><span class="proto">TCP, UDP — segmentos/datagramas</span></div>
+      <div class="osi-row" style="border-color:#34d399"><span class="num" style="color:#34d399">3</span><span>Rede</span><span class="proto">IP, ICMP, ARP, NAT, RIP, OSPF, BGP</span></div>
+      <div class="osi-row" style="border-color:#fbbf24"><span class="num" style="color:#fbbf24">2</span><span>Enlace de Dados</span><span class="proto">MAC, Ethernet, WiFi, Switch, Bridge</span></div>
+      <div class="osi-row" style="border-color:#f87171"><span class="num" style="color:#f87171">1</span><span>Física</span><span class="proto">Bits, cabos, HUB, repetidores, Bluetooth</span></div>
+    </div>
+  </div>
+
+  <!-- Modos de transmissão -->
+  <div class="review-card">
+    <h3> Modos de Transmissão</h3>
+    <ul>
+      <li><strong>Simplex (SX):</strong> comunicação apenas em uma direção. Ex: rádio, TV.</li>
+      <li><strong>Half Duplex (HDX):</strong> bidirecional, mas nunca simultâneo. Ex: Ethernet (fast), WiFi, walkie-talkie.</li>
+      <li><strong>Full Duplex (FDX):</strong> bidirecional simultâneo. Ex: telefone, switches modernos. Implementado via 2 canais simplex ou multiplexação.</li>
+    </ul>
+  </div>
+
+  <!-- Meios de transmissão -->
+  <div class="review-card">
+    <h3> Meios de Transmissão</h3>
+    <ul>
+      <li><strong>Cabo Coaxial:</strong> condutor central de cobre + blindagem. Primeiro tipo usado em redes Ethernet. Hoje usado em TV a cabo.</li>
+      <li><strong>Par Trançado (UTP/STP):</strong> dois condutores trançados para reduzir interferência eletromagnética. Categorias: CAT5, CAT5e, CAT6, CAT7, CAT8.</li>
+      <li><strong>Fibra Óptica:</strong> pulsos de luz em núcleo de vidro/plástico. Alta velocidade, longas distâncias, imune a interferência. Tipos: monomodo (longa distância) e multimodo (curta distância).</li>
+      <li><strong>Wireless:</strong> ondas eletromagnéticas pelo ar. Tecnologias: Wi-Fi, Bluetooth, 4G/5G. Sem necessidade de componente físico.</li>
+    </ul>
+  </div>
+
+  <!-- Tipos de mensagem -->
+  <div class="review-card">
+    <h3> Tipos de Mensagem / Endereçamento</h3>
+    <ul>
+      <li><strong>Unicast:</strong> um para um. Pacote enviado de A para B especificamente.</li>
+      <li><strong>Broadcast:</strong> um para todos da rede. Todos os dispositivos recebem a mensagem.</li>
+      <li><strong>Multicast:</strong> um para um grupo específico. Ex: A envia para B, C e D, mas não para E.</li>
+      <li><strong>Anycast:</strong> um para o mais próximo que oferece o serviço. Usado em grandes redes e na Internet.</li>
+    </ul>
+  </div>
+
+  <!-- Camada de Enlace -->
+  <div class="review-card">
+    <h3>Camada de Enlace (Camada 2)</h3>
+    <p style="margin-bottom:10px;">Converte pacotes em <strong>frames (quadros)</strong>, identifica dispositivos, controla erros e o acesso ao meio.</p>
+    <p style="margin-bottom:8px;">Dividida em duas subcamadas:</p>
+    <ul>
+      <li><strong>MAC (Media Access Control):</strong> controla como dispositivos compartilham o mesmo canal de transmissão.</li>
+      <li><strong>LLC (Logical Link Control):</strong> estabelece e mantém o enlace lógico entre dispositivos.</li>
+    </ul>
+  </div>
+
+  <!-- VLANs -->
+  <div class="review-card">
+    <h3>VLANs</h3>
+    <p style="margin-bottom:10px;">Redes Locais Virtuais. Permite dividir uma rede física em múltiplos domínios de broadcast lógicos independentes.</p>
+    <ul>
+      <li><strong>VLAN ID (tag):</strong> número de 12 bits (0 a 4094) que identifica cada VLAN.</li>
+      <li><strong>Porta Trunk:</strong> transporta várias VLANs simultaneamente. Usa protocolo <strong>802.1q</strong>.</li>
+      <li><strong>Porta de Acesso:</strong> pertence a apenas uma VLAN. O dispositivo não precisa saber da tag ("untagged").</li>
+      <li><strong>Benefícios:</strong> segurança aprimorada, eficiência, gestão simplificada, escalabilidade.</li>
+    </ul>
+  </div>
+
+  <!-- Broadcast Storm -->
+  <div class="review-card">
+    <h3>Broadcast Storm (Tempestade de Broadcast)</h3>
+    <p>Ocorre quando há tráfego excessivo de broadcast na rede, sobrecarregando os dispositivos e podendo paralisar completamente a rede. VLANs ajudam a prevenir broadcast storms ao limitar o domínio de broadcast.</p>
+  </div>
+
+  <!-- Complementar -->
+  <div class="review-card">
+    <h3>Conceitos Extras Importantes</h3>
+    <ul>
+      <li><strong>Largura de Banda:</strong> capacidade máxima teórica de um canal de transmissão (bits/s).</li>
+      <li><strong>Throughput:</strong> taxa real de dados transmitidos com sucesso num dado período.</li>
+      <li><strong>Latência:</strong> tempo que um pacote leva para ir de origem ao destino.</li>
+      <li><strong>LAN:</strong> rede local (local area network), mesmo edifício ou campus.</li>
+      <li><strong>WAN:</strong> rede de longa distância (wide area network), conecta diferentes localidades. Ex: Internet.</li>
+      <li><strong>MAN:</strong> rede metropolitana, cobre uma cidade.</li>
+      <li><strong>TCP vs UDP:</strong> TCP tem controle de erro e retransmissão; UDP não — é mais rápido mas sem garantia.</li>
+    </ul>
+  </div>
+
+</div>
+
+<!-- ======================== QUIZ ======================== -->
+<div id="quiz" class="page">
+  <div class="quiz-header">
+    <h2 id="quiz-title">🧠 Simulado — Redes de Computadores</h2>
+    <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
+      <div class="progress-bar"><div class="progress-fill" id="prog" style="width:0%"></div></div>
+      <div class="score-badge" id="score-badge">0 / 0</div>
+    </div>
+  </div>
+
+  <div class="filter-bar" id="filter-bar">
+    <button class="filter-btn active" onclick="setFilter('all')">Todas</button>
+    <button class="filter-btn" onclick="setFilter('osi')">Modelo OSI</button>
+    <button class="filter-btn" onclick="setFilter('fisica')">Camada Física</button>
+    <button class="filter-btn" onclick="setFilter('enlace')">Enlace</button>
+    <button class="filter-btn" onclick="setFilter('vlan')">VLANs</button>
+    <button class="filter-btn" onclick="setFilter('extra')">Conceitos Gerais</button>
+  </div>
+
+  <div id="quiz-container"></div>
+  <div id="result-container" style="display:none"></div>
+  <div style="display:flex;gap:10px;margin-top:8px;" id="quiz-actions">
+    <button class="btn" id="btn-next" style="display:none" onclick="nextQuestion()">Próxima →</button>
+    <button class="btn secondary" id="btn-finish" style="display:none" onclick="showResult()">Ver resultado</button>
+  </div>
+</div>
+
+<script>
+const allQuestions = [
+  // ===== MODELO OSI =====
+  { tag:'osi', q:'Quantas camadas possui o modelo OSI?', opts:['4','5','7','9'], ans:2, exp:'O modelo OSI possui 7 camadas: Física, Enlace, Rede, Transporte, Sessão, Apresentação e Aplicação.' },
+  { tag:'osi', q:'Qual é a camada responsável pelo roteamento de pacotes entre redes diferentes (ex: LAN para WAN)?', opts:['Camada 2 – Enlace','Camada 3 – Rede','Camada 4 – Transporte','Camada 5 – Sessão'], ans:1, exp:'A Camada 3 (Rede) realiza o roteamento de pacotes. Nela estão protocolos como IP, OSPF, BGP e RIP, além dos roteadores.' },
+  { tag:'osi', q:'A criptografia SSL/TLS é tratada em qual camada do modelo OSI?', opts:['Camada 4 – Transporte','Camada 5 – Sessão','Camada 6 – Apresentação','Camada 7 – Aplicação'], ans:2, exp:'A Camada 6 – Apresentação é responsável por criptografia (SSL/TLS), compressão e conversão de dados.' },
+  { tag:'osi', q:'Os protocolos TCP e UDP pertencem a qual camada do modelo OSI?', opts:['Camada 2 – Enlace','Camada 3 – Rede','Camada 4 – Transporte','Camada 5 – Sessão'], ans:2, exp:'TCP e UDP são protocolos da Camada 4 – Transporte, responsável pelo encapsulamento de dados em segmentos/datagramas.' },
+  { tag:'osi', q:'Qual das alternativas lista corretamente protocolos da Camada de Aplicação (Camada 7)?', opts:['IP, ICMP, ARP','TCP, UDP','HTTP, FTP, DNS, SMTP, DHCP','MAC, Ethernet, WiFi'], ans:2, exp:'A Camada 7 abriga protocolos de aplicação como HTTP (web), FTP (arquivos), DNS (nomes), SMTP (e-mail), DHCP (endereços), SSH, entre outros.' },
+  { tag:'osi', q:'Na camada de Enlace de Dados (Camada 2), os dados são organizados em qual unidade?', opts:['Bits','Pacotes','Segmentos','Frames (Quadros)'], ans:3, exp:'A camada de Enlace trabalha com frames (quadros). A camada de Transporte usa segmentos/datagramas, a Rede usa pacotes e a Física usa bits.' },
+  { tag:'osi', q:'O dispositivo "Switch" opera principalmente em qual camada do modelo OSI?', opts:['Camada 1','Camada 2','Camada 3','Camada 4'], ans:1, exp:'O Switch opera na Camada 2 (Enlace de Dados), tomando decisões com base no endereço MAC. Switches L3 também operam na Camada 3.' },
+  { tag:'osi', q:'Qual camada do OSI é responsável por estabelecer e encerrar sessões de comunicação entre aplicações?', opts:['Camada 4','Camada 5','Camada 6','Camada 7'], ans:1, exp:'A Camada 5 – Sessão gerencia o ciclo de vida das sessões de comunicação (início, manutenção e encerramento).' },
+  { tag:'osi', q:'A conversão de endereços lógicos (IP) em endereços físicos (MAC) ocorre em qual camada?', opts:['Camada 2 – Enlace','Camada 3 – Rede','Camada 4 – Transporte','Camada 1 – Física'], ans:1, exp:'A Camada 3 (Rede) realiza a conversão de endereços IP em endereços MAC, processo realizado pelo protocolo ARP.' },
+  { tag:'osi', q:'Qual protocolo da Camada 3 é utilizado para testar a conectividade entre hosts (comando "ping")?', opts:['HTTP','ARP','ICMP','BGP'], ans:2, exp:'O ICMP (Internet Control Message Protocol) é usado pelo comando ping para testar conectividade. Ele opera na Camada 3 (Rede).' },
+
+  // ===== CAMADA FÍSICA =====
+  { tag:'fisica', q:'Qual é o modo de transmissão que permite comunicação bidirecional simultânea?', opts:['Simplex','Half Duplex','Full Duplex','Multicast'], ans:2, exp:'Full Duplex (FDX) permite transmissão e recepção simultâneas. Ex: telefone. Pode ser implementado com dois canais simplex ou multiplexação.' },
+  { tag:'fisica', q:'Uma transmissão de rádio ou televisão é um exemplo de qual modo de transmissão?', opts:['Full Duplex','Half Duplex','Simplex','Anycast'], ans:2, exp:'Simplex: comunicação em uma única direção. A estação transmite, o receptor apenas recebe, sem possibilidade de retorno pelo mesmo canal.' },
+  { tag:'fisica', q:'As redes WiFi utilizam qual modo de transmissão?', opts:['Full Duplex','Simplex','Half Duplex','Multicast'], ans:2, exp:'WiFi opera em Half Duplex (HDX) pois utiliza um único canal compartilhado, onde transmissão e recepção não ocorrem simultaneamente.' },
+  { tag:'fisica', q:'Qual tipo de cabo foi o PRIMEIRO utilizado em redes de computadores do tipo Ethernet?', opts:['Par trançado CAT5','Fibra óptica','Cabo coaxial','Cabo UTP CAT6'], ans:2, exp:'O cabo coaxial foi o primeiro utilizado em redes Ethernet. Hoje é considerado obsoleto para redes locais, mas ainda é usado em TV a cabo.' },
+  { tag:'fisica', q:'O cabo de par trançado tem seus condutores trançados com o objetivo principal de:', opts:['Aumentar a velocidade de transmissão','Reduzir interferência eletromagnética','Facilitar a instalação','Aumentar a distância máxima'], ans:1, exp:'O trançamento dos condutores cancela campos magnéticos externos, melhorando a compatibilidade eletromagnética e reduzindo ruídos.' },
+  { tag:'fisica', q:'Qual meio de transmissão utiliza pulsos de luz para transportar dados?', opts:['Par trançado','Cabo coaxial','Fibra óptica','Wireless'], ans:2, exp:'A fibra óptica usa pulsos de luz em núcleo de vidro ou plástico. Oferece alta velocidade, longa distância e imunidade a interferência eletromagnética.' },
+  { tag:'fisica', q:'Qual é a principal vantagem da transmissão wireless em relação aos meios guiados?', opts:['Maior velocidade de transmissão','Menor latência','Ausência de componente físico, conferindo flexibilidade','Maior segurança dos dados'], ans:2, exp:'A principal vantagem do wireless é eliminar a necessidade de cabos físicos, permitindo mobilidade e flexibilidade na conexão dos dispositivos.' },
+  { tag:'fisica', q:'Em uma rede Fast Ethernet com cabo de par trançado, qual é a velocidade máxima de transmissão?', opts:['10 Mbps','100 Mbps','1 Gbps','10 Gbps'], ans:1, exp:'Fast Ethernet atinge até 100 Mbps. Redes Gigabit Ethernet chegam a 1 Gbps e 10 Gigabit Ethernet a 10 Gbps.' },
+  { tag:'fisica', q:'Qual tipo de fibra óptica é mais adequado para longas distâncias?', opts:['Multimodo','Monomodo','Par trançado CAT8','Coaxial RG-6'], ans:1, exp:'Fibra monomodo possui núcleo menor e propaga apenas um modo de luz, sofrendo menos dispersão — ideal para longas distâncias. Multimodo é para curtas distâncias.' },
+  { tag:'fisica', q:'Qual a diferença entre Largura de Banda e Throughput?', opts:['São sinônimos','Largura de banda é a taxa real; throughput é a capacidade máxima teórica','Largura de banda é a capacidade máxima teórica; throughput é a taxa real transmitida','Largura de banda mede latência; throughput mede a distância'], ans:2, exp:'Largura de banda = capacidade máxima do canal (teórica). Throughput = taxa real de dados transmitidos com sucesso. Throughput é sempre ≤ largura de banda.' },
+
+  // ===== CAMADA DE ENLACE =====
+  { tag:'enlace', q:'A subcamada MAC da Camada de Enlace é responsável por:', opts:['Roteamento de pacotes entre redes','Estabelecer sessões TCP','Controlar como dispositivos compartilham o mesmo canal de transmissão','Criptografar os dados da camada de aplicação'], ans:2, exp:'MAC (Media Access Control) controla o acesso ao meio compartilhado, evitando colisões e gerenciando quem pode transmitir.' },
+  { tag:'enlace', q:'A subcamada LLC (Logical Link Control) tem como função:', opts:['Converter IPs em MACs','Estabelecer e manter enlaces lógicos entre dispositivos','Rotear pacotes entre redes','Comprimir os dados para transmissão'], ans:1, exp:'LLC estabelece e mantém os enlaces lógicos entre dispositivos na camada 2, provendo uma interface padronizada para as camadas superiores.' },
+  { tag:'enlace', q:'Uma Broadcast Storm (Tempestade de Broadcast) ocorre quando:', opts:['Muitos usuários acessam a Internet ao mesmo tempo','Há quantidade excessiva de tráfego de broadcast na rede','O roteador perde a tabela de rotas','A fibra óptica sofre atenuação excessiva'], ans:1, exp:'Broadcast Storm é causada por tráfego excessivo de broadcast, sobrecarregando os dispositivos e podendo paralisar a rede completamente.' },
+
+  // ===== VLANs =====
+  { tag:'vlan', q:'O que é uma VLAN?', opts:['Uma rede WAN virtual','Uma rede local virtual que separa fisicamente uma rede em múltiplos domínios lógicos','Um protocolo de roteamento dinâmico','Um tipo de cabo de rede'], ans:1, exp:'VLAN (Virtual Local Area Network) permite criar múltiplas redes lógicas independentes sobre uma mesma infraestrutura física.' },
+  { tag:'vlan', q:'Quantos bits compõem o VLAN ID?', opts:['8 bits (0 a 255)','10 bits (0 a 1023)','12 bits (0 a 4094)','16 bits (0 a 65535)'], ans:2, exp:'O VLAN ID é um campo de 12 bits, permitindo valores de 0 a 4094 (total de 4096 VLANs possíveis).' },
+  { tag:'vlan', q:'Uma porta TRUNK em um switch tem a função de:', opts:['Conectar apenas um computador à rede','Transportar múltiplas VLANs simultaneamente entre switches','Bloquear o tráfego de broadcast','Conectar o switch ao roteador sem tag'], ans:1, exp:'Portas trunk transportam frames de múltiplas VLANs usando o protocolo 802.1q para identificar a qual VLAN cada frame pertence.' },
+  { tag:'vlan', q:'Qual protocolo é utilizado pelas portas trunk para identificar as VLANs?', opts:['802.11 (WiFi)','802.3 (Ethernet)','802.1q','STP (Spanning Tree)'], ans:2, exp:'O padrão IEEE 802.1q define o formato de tagging utilizado em portas trunk para identificar a qual VLAN cada frame pertence.' },
+  { tag:'vlan', q:'Uma porta de ACESSO (access port) em uma VLAN:', opts:['Transporta frames de múltiplas VLANs com tag','Pertence a apenas uma VLAN e opera sem tag (untagged)','Exige que o dispositivo conheça o VLAN ID','Usa o protocolo 802.1q para marcar frames'], ans:1, exp:'Portas de acesso pertencem a apenas uma VLAN e os frames são enviados sem tag — o dispositivo conectado não precisa conhecer o conceito de VLAN.' },
+  { tag:'vlan', q:'Qual é UMA das principais vantagens de usar VLANs em uma rede empresarial?', opts:['Elimina a necessidade de roteadores','Aumenta a largura de banda do cabo','Melhora a segurança ao isolar o tráfego em domínios distintos','Dispensa o uso de switches gerenciáveis'], ans:2, exp:'VLANs isolam o tráfego, dificultando o acesso não autorizado a recursos críticos e reduzindo o escopo de possíveis ataques na rede.' },
+  { tag:'vlan', q:'O que acontece com o domínio de broadcast ao criar múltiplas VLANs em um único switch?', opts:['O domínio de broadcast aumenta','O switch deixa de suportar broadcast','O domínio de broadcast é dividido em domínios menores e separados','Nada muda, pois VLANs não afetam o broadcast'], ans:2, exp:'Cada VLAN forma seu próprio domínio de broadcast. Isso reduz o tráfego desnecessário e diminui o uso de CPU dos dispositivos.' },
+
+  // ===== CONCEITOS GERAIS / EXTRA =====
+  { tag:'extra', q:'Qual tipo de mensagem é enviada de um dispositivo para TODOS os dispositivos da rede?', opts:['Unicast','Multicast','Anycast','Broadcast'], ans:3, exp:'Broadcast envia a mensagem para todos os dispositivos na rede/segmento. É reconhecida por um endereço de broadcast especial.' },
+  { tag:'extra', q:'No endereçamento Anycast, a mensagem é entregue:', opts:['A todos os dispositivos da rede','A um grupo específico de dispositivos','Ao dispositivo mais próximo que oferece o serviço','Apenas ao dispositivo de destino especificado'], ans:2, exp:'Anycast roteia a mensagem para o nó mais próximo (em termos de roteamento) que pode atender a requisição. Muito usado em CDNs e DNS raiz.' },
+  { tag:'extra', q:'Qual é a diferença fundamental entre TCP e UDP?', opts:['TCP é mais rápido que UDP','TCP garante entrega e controle de erros; UDP não possui esses mecanismos','UDP é usado apenas em redes cabeadas','TCP opera apenas na Camada 2'], ans:1, exp:'TCP é orientado à conexão, com retransmissão e controle de erros. UDP é sem conexão, mais rápido mas sem garantia de entrega — ideal para streaming e VoIP.' },
+  { tag:'extra', q:'O que é latência em redes de computadores?', opts:['A taxa máxima de dados que um canal suporta','O tempo que um pacote leva para ir da origem ao destino','A quantidade de dados perdidos na transmissão','O número de dispositivos conectados à rede'], ans:1, exp:'Latência é o atraso de rede — o tempo que um pacote demora para percorrer o caminho entre origem e destino. Medida em milissegundos (ms).' },
+  { tag:'extra', q:'Uma rede que cobre uma única cidade é classificada como:', opts:['LAN','WAN','MAN','PAN'], ans:2, exp:'MAN (Metropolitan Area Network) cobre uma cidade ou área metropolitana. LAN é local (edifício/campus), WAN é de longa distância e PAN é pessoal (ex: Bluetooth).' },
+  { tag:'extra', q:'O protocolo DHCP, presente na Camada de Aplicação, tem qual função principal?', opts:['Traduzir nomes de domínio em endereços IP','Enviar e-mails entre servidores','Atribuir automaticamente endereços IP aos dispositivos da rede','Criptografar o tráfego HTTP'], ans:2, exp:'DHCP (Dynamic Host Configuration Protocol) distribui automaticamente configurações de rede aos clientes, incluindo endereço IP, máscara, gateway e DNS.' },
+  { tag:'extra', q:'O QoS (Quality of Service) mencionado na Camada de Rede serve para:', opts:['Criptografar os pacotes','Priorizar determinados tipos de tráfego na rede','Comprimir dados para economizar banda','Converter endereços IPv4 em IPv6'], ans:1, exp:'QoS permite definir prioridades de tráfego, garantindo melhor desempenho para serviços críticos (como VoIP ou videoconferência) em relação a outros tipos de dados.' },
+];
+
+let currentQ = 0;
+let answered = 0;
+let correct = 0;
+let filtered = [];
+let activeFilter = 'all';
+let questionAnswered = false;
+
+function setFilter(f) {
+  activeFilter = f;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+  startQuiz();
+}
+
+function startQuiz() {
+  filtered = activeFilter === 'all' ? [...allQuestions] : allQuestions.filter(q => q.tag === activeFilter);
+  // shuffle
+  for (let i = filtered.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i+1));
+    [filtered[i], filtered[j]] = [filtered[j], filtered[i]];
+  }
+  currentQ = 0; answered = 0; correct = 0;
+  document.getElementById('result-container').style.display = 'none';
+  document.getElementById('quiz-container').style.display = 'block';
+  document.getElementById('filter-bar').style.display = 'flex';
+  document.getElementById('quiz-actions').style.display = 'flex';
+  renderQuestion();
+}
+
+function renderQuestion() {
+  if (currentQ >= filtered.length) { showResult(); return; }
+  questionAnswered = false;
+  const q = filtered[currentQ];
+  const container = document.getElementById('quiz-container');
+  const letters = ['A','B','C','D','E'];
+  const tagLabels = {osi:'OSI',fisica:'Física',enlace:'Enlace',vlan:'VLAN',extra:'Geral'};
+  const tagColors = {osi:'blue',fisica:'green',enlace:'purple',vlan:'orange',extra:''};
+
+  container.innerHTML = `
+    <div class="question-card">
+      <div class="question-num">
+        <span class="tag ${tagColors[q.tag]||''}">${tagLabels[q.tag]||q.tag}</span>
+        &nbsp; Questão ${currentQ+1} de ${filtered.length}
+      </div>
+      <div class="question-text">${q.q}</div>
+      <div class="options" id="opts">
+        ${q.opts.map((o,i)=>`
+          <div class="option" id="opt${i}" onclick="answer(${i})">
+            <span class="opt-letter">${letters[i]})</span>
+            <span>${o}</span>
+          </div>
+        `).join('')}
+      </div>
+      <div class="feedback" id="feedback"></div>
+    </div>
+  `;
+  updateProgress();
+  document.getElementById('btn-next').style.display = 'none';
+  document.getElementById('btn-finish').style.display = 'none';
+}
+
+function answer(idx) {
+  if (questionAnswered) return;
+  questionAnswered = true;
+  answered++;
+  const q = filtered[currentQ];
+  const opts = document.querySelectorAll('.option');
+  opts.forEach(o => o.classList.add('disabled'));
+  const fb = document.getElementById('feedback');
+
+  if (idx === q.ans) {
+    correct++;
+    opts[idx].classList.add('correct');
+    fb.className = 'feedback show correct';
+    fb.textContent = '✅ Correto! ' + q.exp;
+  } else {
+    opts[idx].classList.add('wrong');
+    opts[q.ans].classList.add('correct');
+    fb.className = 'feedback show wrong';
+    fb.textContent = '❌ Incorreto. ' + q.exp;
+  }
+  updateProgress();
+
+  if (currentQ < filtered.length - 1) {
+    document.getElementById('btn-next').style.display = 'inline-flex';
+  } else {
+    document.getElementById('btn-finish').style.display = 'inline-flex';
+  }
+}
+
+function nextQuestion() {
+  currentQ++;
+  document.getElementById('btn-next').style.display = 'none';
+  document.getElementById('btn-finish').style.display = 'none';
+  renderQuestion();
+}
+
+function showResult() {
+  const pct = Math.round((correct / filtered.length) * 100);
+  let emoji = pct >= 80 ? '🏆' : pct >= 60 ? '😊' : pct >= 40 ? '😅' : '📚';
+  let msg = pct >= 80 ? 'Excelente! Continue assim!' : pct >= 60 ? 'Bom resultado! Revise os erros.' : pct >= 40 ? 'Precisa praticar mais. Revise o material!' : 'Hora de rever a teoria com calma!';
+  document.getElementById('quiz-container').style.display = 'none';
+  document.getElementById('filter-bar').style.display = 'none';
+  document.getElementById('quiz-actions').style.display = 'none';
+  const rc = document.getElementById('result-container');
+  rc.style.display = 'block';
+  rc.innerHTML = `
+    <div class="result-box">
+      <div style="font-size:3rem">${emoji}</div>
+      <div class="big-score">${correct}/${filtered.length}</div>
+      <p style="font-size:1.1rem;font-weight:700;margin-top:4px;color:var(--text)">${pct}% de acerto</p>
+      <p style="margin-top:8px">${msg}</p>
+      <div class="actions">
+        <button class="btn" onclick="startQuiz()">🔄 Tentar novamente</button>
+        <button class="btn secondary" onclick="showPage('revisao')">📖 Revisar material</button>
+      </div>
+    </div>
+  `;
+}
+
+function updateProgress() {
+  const pct = filtered.length ? (answered / filtered.length) * 100 : 0;
+  document.getElementById('prog').style.width = pct + '%';
+  document.getElementById('score-badge').textContent = correct + ' / ' + answered;
+}
+
+function showPage(p) {
+  document.querySelectorAll('.page').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
+  document.getElementById(p).classList.add('active');
+  document.querySelectorAll('.tab').forEach(t => { if(t.textContent.toLowerCase().includes(p === 'revisao' ? 'revisão' : 'questões')) t.classList.add('active'); });
+  if (p === 'quiz' && filtered.length === 0) startQuiz();
+}
+
+// init
+startQuiz();
+</script>
+</body>
+</html>
