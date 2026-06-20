@@ -3,416 +3,1903 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Revisão – Redes de Computadores</title>
-<style>
-  :root {
-    --bg: #0f172a;
-    --surface: #1e293b;
-    --surface2: #273248;
-    --accent: #38bdf8;
-    --accent2: #818cf8;
-    --green: #4ade80;
-    --red: #f87171;
-    --yellow: #fbbf24;
-    --text: #e2e8f0;
-    --muted: #94a3b8;
-    --border: #334155;
-    --radius: 12px;
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; min-height: 100vh; }
-
-  /* ---------- NAV ---------- */
-  nav { background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 24px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; position: sticky; top: 0; z-index: 100; }
-  nav h1 { font-size: 1rem; font-weight: 700; color: var(--accent); padding: 14px 0; margin-right: 16px; }
-  .tab { background: none; border: none; color: var(--muted); padding: 16px 14px; cursor: pointer; font-size: .85rem; font-weight: 600; border-bottom: 3px solid transparent; transition: all .2s; white-space: nowrap; }
-  .tab:hover { color: var(--text); }
-  .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
-
-  /* ---------- LAYOUT ---------- */
-  .page { display: none; padding: 32px 24px; max-width: 860px; margin: 0 auto; }
-  .page.active { display: block; }
-
-  /* ---------- REVIEW CARDS ---------- */
-  .section-title { font-size: 1.3rem; font-weight: 700; color: var(--accent); margin-bottom: 20px; padding-bottom: 8px; border-bottom: 2px solid var(--border); }
-  .review-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px 24px; margin-bottom: 16px; }
-  .review-card h3 { font-size: 1rem; font-weight: 700; color: var(--accent2); margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
-  .review-card p, .review-card li { color: var(--text); font-size: .92rem; line-height: 1.7; }
-  .review-card ul { padding-left: 18px; }
-  .review-card li { margin-bottom: 4px; }
-  .tag { background: var(--accent2); color: #fff; font-size: .7rem; padding: 2px 8px; border-radius: 20px; font-weight: 600; }
-  .tag.green { background: #166534; color: var(--green); }
-  .tag.blue { background: #0c4a6e; color: var(--accent); }
-  .tag.purple { background: #3730a3; color: #a5b4fc; }
-  .tag.orange { background: #7c2d12; color: #fb923c; }
-
-  .osi-grid { display: grid; gap: 6px; margin-top: 10px; }
-  .osi-row { display: grid; grid-template-columns: 40px 1fr 1fr; gap: 8px; align-items: center; background: var(--surface2); border-radius: 8px; padding: 8px 12px; border-left: 4px solid; }
-  .osi-row span { font-size: .85rem; }
-  .osi-row .num { font-weight: 800; font-size: 1rem; }
-  .osi-row .proto { color: var(--muted); font-size: .78rem; }
-
-  /* ---------- QUIZ ---------- */
-  .quiz-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; flex-wrap: wrap; gap: 12px; }
-  .quiz-header h2 { font-size: 1.1rem; font-weight: 700; }
-  .progress-bar { background: var(--border); border-radius: 99px; height: 8px; flex: 1; min-width: 120px; overflow: hidden; }
-  .progress-fill { background: linear-gradient(90deg, var(--accent), var(--accent2)); height: 100%; border-radius: 99px; transition: width .4s; }
-  .score-badge { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 6px 14px; font-size: .85rem; font-weight: 700; color: var(--accent); }
-
-  .question-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; margin-bottom: 20px; }
-  .question-num { font-size: .78rem; color: var(--muted); font-weight: 600; margin-bottom: 8px; }
-  .question-text { font-size: 1rem; line-height: 1.6; margin-bottom: 18px; font-weight: 600; }
-  .options { display: flex; flex-direction: column; gap: 10px; }
-  .option { background: var(--surface2); border: 2px solid var(--border); border-radius: 10px; padding: 12px 16px; cursor: pointer; font-size: .9rem; line-height: 1.5; transition: all .2s; display: flex; gap: 10px; align-items: flex-start; }
-  .option:hover:not(.disabled) { border-color: var(--accent); color: var(--accent); }
-  .option.correct { border-color: var(--green); background: #052e16; color: var(--green); }
-  .option.wrong { border-color: var(--red); background: #2d0b0b; color: var(--red); }
-  .option.disabled { cursor: default; }
-  .opt-letter { font-weight: 800; min-width: 20px; }
-  .feedback { margin-top: 14px; padding: 12px 16px; border-radius: 8px; font-size: .88rem; line-height: 1.5; display: none; }
-  .feedback.show { display: block; }
-  .feedback.correct { background: #052e16; border: 1px solid var(--green); color: var(--green); }
-  .feedback.wrong { background: #2d0b0b; border: 1px solid var(--red); color: var(--red); }
-
-  .btn { background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #0f172a; border: none; border-radius: 8px; padding: 10px 22px; font-weight: 700; font-size: .9rem; cursor: pointer; transition: opacity .2s; }
-  .btn:hover { opacity: .85; }
-  .btn.secondary { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
-
-  .result-box { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 32px; text-align: center; }
-  .result-box .big-score { font-size: 4rem; font-weight: 900; background: linear-gradient(135deg, var(--accent), var(--accent2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-  .result-box p { color: var(--muted); margin-top: 8px; }
-  .result-box .actions { margin-top: 20px; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
-
-  .filter-bar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
-  .filter-btn { background: var(--surface2); border: 1px solid var(--border); color: var(--muted); border-radius: 20px; padding: 6px 14px; font-size: .82rem; font-weight: 600; cursor: pointer; transition: all .2s; }
-  .filter-btn:hover, .filter-btn.active { background: var(--accent); color: #0f172a; border-color: var(--accent); }
-
-  @media(max-width:600px) {
-    .page { padding: 20px 14px; }
-    .osi-grid .osi-row { grid-template-columns: 32px 1fr; }
-    .osi-row .proto { display: none; }
-  }
-</style>
+<title>Estudos - Controle Administrativo e Financeiro</title>
 </head>
-<body>
+
+<body class="claro">
+
+<header>
+
+<h1>🌱 Assistência Técnica e Extensão Rural (ATER) 🌱</h1>
+
+<button id="tema">
+🌙 Modo Escuro
+</button>
+
+</header>
+
 
 <nav>
-  <h1>📡 Redes ADS</h1>
-  <button class="tab active" onclick="showPage('revisao')">📖 Revisão</button>
-  <button class="tab" onclick="showPage('quiz')">🧠 Teste para 1ª prova</button>
-  <button class="tab"><a href="teste_rede_prova_2.html" class="tab" style="text-decoration: none; background-color: #e3c154; color: black;">🧠 Teste da 2ª Prova 🧠</a></button>
+
+<button class="aba ativa" onclick="abrirAba('resumo')">
+📚 Resumo
+</button>
+
+<button class="aba" onclick="abrirAba('quiz')">
+📝 Quiz
+</button>
+
 </nav>
 
-<!-- ======================== REVISÃO ======================== -->
-<div id="revisao" class="page active">
 
-  <p class="section-title">📖 Revisão Rápida do Conteúdo</p>
+<main>
 
-  <!-- OSI -->
-  <div class="review-card">
-    <h3><span class="tag blue">Aula 00</span> Modelo OSI — As 7 Camadas</h3>
-    <p style="margin-bottom:12px;color:var(--muted);font-size:.88rem;">Lembre: <strong>"AAPTREFF"</strong> de baixo pra cima → Física, Enlace, Rede, Transporte, Sessão, Apresentação, Aplicação</p>
-    <div class="osi-grid">
-      <div class="osi-row" style="border-color:#f472b6"><span class="num" style="color:#f472b6">7</span><span>Aplicação</span><span class="proto">HTTP, FTP, DNS, DHCP, SMTP, SSH</span></div>
-      <div class="osi-row" style="border-color:#a78bfa"><span class="num" style="color:#a78bfa">6</span><span>Apresentação</span><span class="proto">SSL/TLS, criptografia, compressão</span></div>
-      <div class="osi-row" style="border-color:#818cf8"><span class="num" style="color:#818cf8">5</span><span>Sessão</span><span class="proto">Abertura/encerramento de sessões</span></div>
-      <div class="osi-row" style="border-color:#38bdf8"><span class="num" style="color:#38bdf8">4</span><span>Transporte</span><span class="proto">TCP, UDP — segmentos/datagramas</span></div>
-      <div class="osi-row" style="border-color:#34d399"><span class="num" style="color:#34d399">3</span><span>Rede</span><span class="proto">IP, ICMP, ARP, NAT, RIP, OSPF, BGP</span></div>
-      <div class="osi-row" style="border-color:#fbbf24"><span class="num" style="color:#fbbf24">2</span><span>Enlace de Dados</span><span class="proto">MAC, Ethernet, WiFi, Switch, Bridge</span></div>
-      <div class="osi-row" style="border-color:#f87171"><span class="num" style="color:#f87171">1</span><span>Física</span><span class="proto">Bits, cabos, HUB, repetidores, Bluetooth</span></div>
-    </div>
-  </div>
 
-  <!-- Modos de transmissão -->
-  <div class="review-card">
-    <h3> Modos de Transmissão</h3>
-    <ul>
-      <li><strong>Simplex (SX):</strong> comunicação apenas em uma direção. Ex: rádio, TV.</li>
-      <li><strong>Half Duplex (HDX):</strong> bidirecional, mas nunca simultâneo. Ex: Ethernet (fast), WiFi, walkie-talkie.</li>
-      <li><strong>Full Duplex (FDX):</strong> bidirecional simultâneo. Ex: telefone, switches modernos. Implementado via 2 canais simplex ou multiplexação.</li>
-    </ul>
-  </div>
+<!-- ABA RESUMO -->
 
-  <!-- Meios de transmissão -->
-  <div class="review-card">
-    <h3> Meios de Transmissão</h3>
-    <ul>
-      <li><strong>Cabo Coaxial:</strong> condutor central de cobre + blindagem. Primeiro tipo usado em redes Ethernet. Hoje usado em TV a cabo.</li>
-      <li><strong>Par Trançado (UTP/STP):</strong> dois condutores trançados para reduzir interferência eletromagnética. Categorias: CAT5, CAT5e, CAT6, CAT7, CAT8.</li>
-      <li><strong>Fibra Óptica:</strong> pulsos de luz em núcleo de vidro/plástico. Alta velocidade, longas distâncias, imune a interferência. Tipos: monomodo (longa distância) e multimodo (curta distância).</li>
-      <li><strong>Wireless:</strong> ondas eletromagnéticas pelo ar. Tecnologias: Wi-Fi, Bluetooth, 4G/5G. Sem necessidade de componente físico.</li>
-    </ul>
-  </div>
+<section id="resumo" class="conteudo ativo">
 
-  <!-- Tipos de mensagem -->
-  <div class="review-card">
-    <h3> Tipos de Mensagem / Endereçamento</h3>
-    <ul>
-      <li><strong>Unicast:</strong> um para um. Pacote enviado de A para B especificamente.</li>
-      <li><strong>Broadcast:</strong> um para todos da rede. Todos os dispositivos recebem a mensagem.</li>
-      <li><strong>Multicast:</strong> um para um grupo específico. Ex: A envia para B, C e D, mas não para E.</li>
-      <li><strong>Anycast:</strong> um para o mais próximo que oferece o serviço. Usado em grandes redes e na Internet.</li>
-    </ul>
-  </div>
 
-  <!-- Camada de Enlace -->
-  <div class="review-card">
-    <h3>Camada de Enlace (Camada 2)</h3>
-    <p style="margin-bottom:10px;">Converte pacotes em <strong>frames (quadros)</strong>, identifica dispositivos, controla erros e o acesso ao meio.</p>
-    <p style="margin-bottom:8px;">Dividida em duas subcamadas:</p>
-    <ul>
-      <li><strong>MAC (Media Access Control):</strong> controla como dispositivos compartilham o mesmo canal de transmissão.</li>
-      <li><strong>LLC (Logical Link Control):</strong> estabelece e mantém o enlace lógico entre dispositivos.</li>
-    </ul>
-  </div>
+<h2>📖 Resumo dos principais assuntos</h2>
 
-  <!-- VLANs -->
-  <div class="review-card">
-    <h3>VLANs</h3>
-    <p style="margin-bottom:10px;">Redes Locais Virtuais. Permite dividir uma rede física em múltiplos domínios de broadcast lógicos independentes.</p>
-    <ul>
-      <li><strong>VLAN ID (tag):</strong> número de 12 bits (0 a 4094) que identifica cada VLAN.</li>
-      <li><strong>Porta Trunk:</strong> transporta várias VLANs simultaneamente. Usa protocolo <strong>802.1q</strong>.</li>
-      <li><strong>Porta de Acesso:</strong> pertence a apenas uma VLAN. O dispositivo não precisa saber da tag ("untagged").</li>
-      <li><strong>Benefícios:</strong> segurança aprimorada, eficiência, gestão simplificada, escalabilidade.</li>
-    </ul>
-  </div>
 
-  <!-- Broadcast Storm -->
-  <div class="review-card">
-    <h3>Broadcast Storm (Tempestade de Broadcast)</h3>
-    <p>Ocorre quando há tráfego excessivo de broadcast na rede, sobrecarregando os dispositivos e podendo paralisar completamente a rede. VLANs ajudam a prevenir broadcast storms ao limitar o domínio de broadcast.</p>
-  </div>
 
-  <!-- Complementar -->
-  <div class="review-card">
-    <h3>Conceitos Extras Importantes</h3>
-    <ul>
-      <li><strong>Largura de Banda:</strong> capacidade máxima teórica de um canal de transmissão (bits/s).</li>
-      <li><strong>Throughput:</strong> taxa real de dados transmitidos com sucesso num dado período.</li>
-      <li><strong>Latência:</strong> tempo que um pacote leva para ir de origem ao destino.</li>
-      <li><strong>LAN:</strong> rede local (local area network), mesmo edifício ou campus.</li>
-      <li><strong>WAN:</strong> rede de longa distância (wide area network), conecta diferentes localidades. Ex: Internet.</li>
-      <li><strong>MAN:</strong> rede metropolitana, cobre uma cidade.</li>
-      <li><strong>TCP vs UDP:</strong> TCP tem controle de erro e retransmissão; UDP não — é mais rápido mas sem garantia.</li>
-    </ul>
-  </div>
+<div class="card">
+
+<h3>1. Conceito e Objetivos da ATER</h3>
+
+<p>
+A Assistência Técnica e Extensão Rural (ATER) é um conjunto de ações que promove a transferência e construção de conhecimentos junto aos produtores rurais, contribuindo para o desenvolvimento sustentável das propriedades.
+</p>
+
+<ul>
+<li><strong>Produtividade:</strong> aumentar a eficiência dos sistemas produtivos.</li>
+
+<li><strong>Gestão:</strong> melhorar o controle técnico, administrativo e financeiro.</li>
+
+<li><strong>Sustentabilidade:</strong> equilibrar aspectos econômicos, sociais e ambientais.</li>
+
+<li><strong>Qualidade de vida:</strong> promover melhorias para as famílias rurais.</li>
+
+<li><strong>Tomada de decisão:</strong> auxiliar produtores com informações técnicas confiáveis.</li>
+
+</ul>
 
 </div>
 
-<!-- ======================== QUIZ ======================== -->
-<div id="quiz" class="page">
-  <div class="quiz-header">
-    <h2 id="quiz-title">🧠 Simulado — Redes de Computadores</h2>
-    <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
-      <div class="progress-bar"><div class="progress-fill" id="prog" style="width:0%"></div></div>
-      <div class="score-badge" id="score-badge">0 / 0</div>
-    </div>
-  </div>
+<div class="card">
 
-  <div class="filter-bar" id="filter-bar">
-    <button class="filter-btn active" onclick="setFilter('all')">Todas</button>
-    <button class="filter-btn" onclick="setFilter('osi')">Modelo OSI</button>
-    <button class="filter-btn" onclick="setFilter('fisica')">Camada Física</button>
-    <button class="filter-btn" onclick="setFilter('enlace')">Enlace</button>
-    <button class="filter-btn" onclick="setFilter('vlan')">VLANs</button>
-    <button class="filter-btn" onclick="setFilter('extra')">Conceitos Gerais</button>
-  </div>
+<h3>2. Evolução dos Modelos de ATER</h3>
 
-  <div id="quiz-container"></div>
-  <div id="result-container" style="display:none"></div>
-  <div style="display:flex;gap:10px;margin-top:8px;" id="quiz-actions">
-    <button class="btn" id="btn-next" style="display:none" onclick="nextQuestion()">Próxima →</button>
-    <button class="btn secondary" id="btn-finish" style="display:none" onclick="showResult()">Ver resultado</button>
-  </div>
+<p>
+Ao longo dos anos, a extensão rural evoluiu de um modelo baseado apenas na transferência de tecnologia para um modelo mais participativo e colaborativo.
+</p>
+
+<ul>
+
+<li><strong>Modelo Difusionista:</strong> o técnico transmitia conhecimento e o produtor apenas recebia as orientações.</li>
+
+<li><strong>Modelo Participativo:</strong> produtor e técnico constroem juntos as soluções.</li>
+
+<li><strong>Valorização do conhecimento local:</strong> considera a experiência dos agricultores.</li>
+
+<li><strong>Maior engajamento:</strong> aumenta a adoção das tecnologias recomendadas.</li>
+
+</ul>
+
 </div>
+
+<div class="card">
+
+<h3>3. Pnater e Anater</h3>
+
+<p>
+A Política Nacional de Assistência Técnica e Extensão Rural (Pnater) estabelece as diretrizes da ATER no Brasil, enquanto a Anater coordena e articula a execução dos serviços.
+</p>
+
+<ul>
+
+<li><strong>Pnater:</strong> define princípios, objetivos e diretrizes.</li>
+
+<li><strong>Anater:</strong> integra instituições e promove ações de ATER.</li>
+
+<li><strong>Inclusão social:</strong> busca fortalecer agricultores familiares.</li>
+
+<li><strong>Desenvolvimento sustentável:</strong> orienta todas as ações da política.</li>
+
+</ul>
+
+</div>
+
+<div class="card">
+
+<h3>4. Dimensões da Propriedade Rural</h3>
+
+<p>
+A análise da propriedade rural deve considerar diferentes aspectos que influenciam diretamente os resultados produtivos e a sustentabilidade.
+</p>
+
+<ul>
+
+<li><strong>Produtiva:</strong> desempenho das atividades agropecuárias.</li>
+
+<li><strong>Econômica:</strong> receitas, custos e rentabilidade.</li>
+
+<li><strong>Social:</strong> qualidade de vida e relações familiares.</li>
+
+<li><strong>Ambiental:</strong> conservação dos recursos naturais.</li>
+
+</ul>
+
+</div>
+
+<div class="card">
+
+<h3>5. Sustentabilidade Rural</h3>
+
+<p>
+A sustentabilidade busca garantir a produção atual sem comprometer os recursos necessários para as futuras gerações.
+</p>
+
+<ul>
+
+<li><strong>Econômica:</strong> geração de renda e viabilidade financeira.</li>
+
+<li><strong>Social:</strong> inclusão, bem-estar e desenvolvimento humano.</li>
+
+<li><strong>Ambiental:</strong> preservação do solo, água e biodiversidade.</li>
+
+<li><strong>Cultural:</strong> valorização dos costumes e tradições locais.</li>
+
+</ul>
+
+</div>
+
+<div class="card">
+
+<h3>6. Modelos de Prestação de ATER</h3>
+
+<p>
+Os serviços de assistência técnica podem ser prestados por diferentes instituições.
+</p>
+
+<ul>
+
+<li><strong>Público Estatal:</strong> Emater e órgãos governamentais.</li>
+
+<li><strong>Privado:</strong> cooperativas, empresas e consultorias.</li>
+
+<li><strong>Híbrido (ATeG/Senar):</strong> assistência técnica associada à gestão da propriedade.</li>
+
+<li><strong>Parcerias:</strong> integração entre instituições públicas e privadas.</li>
+
+</ul>
+
+</div>
+
+<div class="card">
+
+<h3>7. Metodologias da ATER</h3>
+
+<p>
+A extensão rural utiliza diferentes métodos para transmitir conhecimento e promover aprendizado.
+</p>
+
+<ul>
+
+<li><strong>Visita Técnica:</strong> acompanhamento individual na propriedade.</li>
+
+<li><strong>Dia de Campo:</strong> demonstração prática de tecnologias.</li>
+
+<li><strong>Cursos e Oficinas:</strong> capacitação coletiva.</li>
+
+<li><strong>Excursões Técnicas:</strong> troca de experiências entre produtores.</li>
+
+<li><strong>DRP:</strong> Diagnóstico Rural Participativo.</li>
+
+</ul>
+
+</div>
+
+<div class="card">
+
+<h3>8. Diagnóstico Rural Participativo (DRP)</h3>
+
+<p>
+Ferramenta que envolve os produtores na identificação dos problemas e oportunidades da propriedade.
+</p>
+
+<ul>
+
+<li><strong>Participação ativa:</strong> produtores colaboram no diagnóstico.</li>
+
+<li><strong>Identificação de prioridades:</strong> definição conjunta dos principais desafios.</li>
+
+<li><strong>Planejamento participativo:</strong> construção coletiva das soluções.</li>
+
+<li><strong>Maior comprometimento:</strong> aumenta a adesão às ações propostas.</li>
+
+</ul>
+
+</div>
+
+<div class="card">
+
+<h3>9. Políticas Públicas para Agricultura Familiar</h3>
+
+<p>
+Diversos programas apoiam o desenvolvimento da agricultura familiar.
+</p>
+
+<ul>
+
+<li><strong>Pronaf:</strong> financiamento rural.</li>
+
+<li><strong>PAA:</strong> compra de alimentos da agricultura familiar.</li>
+
+<li><strong>PNAE:</strong> aquisição de alimentos para merenda escolar.</li>
+
+<li><strong>CAF:</strong> cadastro obrigatório para acesso aos programas.</li>
+
+</ul>
+
+</div>
+
+<div class="card">
+
+<h3>10. Mercado Agropecuário</h3>
+
+<p>
+O mercado agropecuário sofre influência de fatores internos e externos que afetam preços e rentabilidade.
+</p>
+
+<ul>
+
+<li><strong>Clima:</strong> impacta diretamente a produção.</li>
+
+<li><strong>Câmbio:</strong> influencia exportações e importações.</li>
+
+<li><strong>Mercado Internacional:</strong> afeta oferta e demanda.</li>
+
+<li><strong>Commodities:</strong> foco em volume e custo.</li>
+
+<li><strong>Nichos:</strong> foco em qualidade e valor agregado.</li>
+
+</ul>
+
+</div>
+
+<div class="card">
+
+<h3>11. Inovação Tecnológica no Agro</h3>
+
+<p>
+A tecnologia vem transformando a gestão e a produção agropecuária.
+</p>
+
+<ul>
+
+<li><strong>Aplicativos de gestão:</strong> controle de indicadores.</li>
+
+<li><strong>Drones:</strong> monitoramento das lavouras.</li>
+
+<li><strong>Sensores:</strong> coleta de dados em tempo real.</li>
+
+<li><strong>Softwares em nuvem:</strong> armazenamento e análise de informações.</li>
+
+<li><strong>Agricultura de precisão:</strong> uso eficiente dos recursos.</li>
+
+</ul>
+
+</div>
+
+<div class="card">
+
+<h3>12. Comunicação na Assistência Técnica</h3>
+
+<p>
+A comunicação eficiente é essencial para o sucesso do trabalho do extensionista.
+</p>
+
+<ul>
+
+<li><strong>Comunicação verbal:</strong> fala e escrita.</li>
+
+<li><strong>Comunicação não verbal:</strong> gestos e expressões.</li>
+
+<li><strong>Escuta ativa:</strong> ouvir e compreender o produtor.</li>
+
+<li><strong>Empatia:</strong> compreender a realidade do público atendido.</li>
+
+<li><strong>Linguagem adequada:</strong> adaptação ao contexto rural.</li>
+
+</ul>
+
+</div>
+
+<div class="card">
+
+<h3>13. Ética e Atuação Profissional</h3>
+
+<p>
+O profissional deve agir com responsabilidade, transparência e respeito.
+</p>
+
+<ul>
+
+<li><strong>Ética:</strong> agir corretamente em todas as situações.</li>
+
+<li><strong>Responsabilidade:</strong> compromisso com os resultados.</li>
+
+<li><strong>Transparência:</strong> informações claras e confiáveis.</li>
+
+<li><strong>Profissionalismo:</strong> postura adequada perante clientes e instituições.</li>
+
+</ul>
+
+</div>
+
+<div class="card">
+
+<h3>14. Liderança e Trabalho em Equipe</h3>
+
+<p>
+A liderança contribui para o alcance dos objetivos e fortalecimento das equipes.
+</p>
+
+<ul>
+
+<li><strong>Motivação:</strong> incentivar as pessoas.</li>
+
+<li><strong>Cooperação:</strong> trabalho conjunto.</li>
+
+<li><strong>Comunicação eficiente:</strong> alinhamento das atividades.</li>
+
+<li><strong>Tomada de decisão:</strong> resolução de problemas.</li>
+
+</ul>
+
+</div>
+
+<div class="card">
+
+<h3>15. Planejamento Sustentável e Ferramentas de Gestão</h3>
+
+<p>
+O planejamento permite organizar ações e acompanhar resultados de forma estruturada.
+</p>
+
+<ul>
+
+<li><strong>PDCA:</strong> Planejar, Fazer, Verificar e Agir.</li>
+
+<li><strong>5W3H:</strong> ferramenta para organizar ações e responsabilidades.</li>
+
+<li><strong>Metas:</strong> definição de objetivos.</li>
+
+<li><strong>Acompanhamento:</strong> avaliação constante dos resultados.</li>
+
+</ul>
+
+</div>
+
+<div class="card">
+
+<h3>16. Agricultura Sustentável e Conservação Ambiental</h3>
+
+<p>
+A produção sustentável busca aumentar a eficiência sem degradar os recursos naturais.
+</p>
+
+<ul>
+
+<li><strong>Conservação do solo:</strong> redução da erosão.</li>
+
+<li><strong>Proteção da água:</strong> uso racional dos recursos hídricos.</li>
+
+<li><strong>Rotação de culturas:</strong> melhoria da fertilidade do solo.</li>
+
+<li><strong>Controle integrado de pragas:</strong> redução do uso excessivo de defensivos.</li>
+
+<li><strong>Integração Lavoura-Pecuária:</strong> melhor aproveitamento da área.</li>
+
+</ul>
+
+</div>
+
+<div class="card">
+
+<h3>17. Gestão de Resíduos e Segurança do Trabalho</h3>
+
+<p>
+Boas práticas de gestão reduzem impactos ambientais e aumentam a segurança dos trabalhadores.
+</p>
+
+<ul>
+
+<li><strong>Destinação correta de resíduos:</strong> preservação ambiental.</li>
+
+<li><strong>Gestão de embalagens:</strong> descarte adequado.</li>
+
+<li><strong>Prevenção de acidentes:</strong> redução de riscos ocupacionais.</li>
+
+<li><strong>Uso de EPIs:</strong> proteção dos trabalhadores.</li>
+
+</ul>
+
+</div>
+
+<div class="card">
+
+<h3>18. Monitoramento e Melhoria Contínua</h3>
+
+<p>
+O acompanhamento sistemático dos resultados permite corrigir falhas e melhorar continuamente os processos.
+</p>
+
+<ul>
+
+<li><strong>Indicadores produtivos:</strong> medem desempenho da produção.</li>
+
+<li><strong>Indicadores econômicos:</strong> avaliam rentabilidade.</li>
+
+<li><strong>Indicadores ambientais:</strong> monitoram sustentabilidade.</li>
+
+<li><strong>Relatórios técnicos:</strong> registro das informações.</li>
+
+<li><strong>Feedback:</strong> identificação de melhorias.</li>
+
+<li><strong>Capacitação contínua:</strong> atualização profissional permanente.</li>
+
+</ul>
+
+</div>
+
+
+
+<!-- <div class="formula">
+
+<p>
+COE = Gastos pagos diretamente na produção
+</p>
+
+<p>
+COT = COE + Depreciação + Mão de obra familiar
+</p>
+
+<p>
+CT = COT + Remuneração do capital
+</p>
+
+<p>
+MB = Receita Bruta − COE
+</p>
+
+<p>
+ML = Receita Bruta − COT
+</p>
+
+<p>
+Lucro = Receita Bruta − CT
+</p>
+
+<p>
+PCOT = COT ÷ Quantidade produzida
+</p>
+
+<p>
+Desvio = Resultado obtido − Meta planejada
+</p>
+
+<p>
+Taxa de retorno = (Lucro ÷ Capital investido) × 100
+</p>
+
+
+</div> -->
+
+
+</div>
+
+
+</section>
+
+
+
+<!-- ABA QUIZ -->
+
+<section id="quiz" class="conteudo">
+
+
+<h2>
+📝 Quiz de Revisão
+</h2>
+
+
+<div class="progresso">
+
+<div id="barra"></div>
+
+</div>
+
+
+<p id="contador">
+Questão 1 de 40
+</p>
+
+
+<div id="pergunta">
+
+</div>
+
+
+<div id="alternativas">
+
+</div>
+
+
+<button id="responder">
+Responder
+</button>
+
+
+<div id="resultado">
+
+</div>
+
+
+<div id="final">
+
+</div>
+
+
+</section>
+
+
+</main>
+<style>
+    /* RESET GERAL */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+
+/* CONFIGURAÇÕES DO BODY */
+
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    transition: 0.3s;
+    line-height: 1.6;
+}
+
+
+/* MODO CLARO */
+
+body.claro {
+    background-color: #f3f6f4;
+    color: #222;
+}
+
+
+/* MODO ESCURO */
+
+body.escuro {
+    background-color: #121212;
+    color: #e4e4e4;
+}
+
+
+/* CABEÇALHO */
+
+header {
+    background: #2e7d32;
+    color: white;
+    text-align: center;
+    padding: 20px;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+
+header h1 {
+    margin-bottom: 15px;
+    font-size: 26px;
+}
+
+
+/* BOTÃO DE TEMA */
+
+#tema {
+    background: white;
+    color: #2e7d32;
+    border: none;
+    padding: 10px 18px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+
+#tema:hover {
+    transform: scale(1.05);
+}
+
+
+/* MENU DE ABAS */
+
+nav {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    padding: 15px;
+    background: #d9eadb;
+}
+
+
+body.escuro nav {
+    background: #1d1d1d;
+}
+
+
+.aba {
+    border: none;
+    padding: 12px 25px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 16px;
+    background: white;
+    transition: 0.3s;
+}
+
+
+.aba:hover {
+    transform: translateY(-3px);
+}
+
+
+.aba.ativa {
+    background: #2e7d32;
+    color: white;
+}
+
+
+/* CONTEÚDOS */
+
+.conteudo {
+    display: none;
+    padding: 25px;
+    max-width: 900px;
+    margin: auto;
+}
+
+
+.conteudo.ativo {
+    display: block;
+}
+
+
+/* CARDS DO RESUMO */
+
+.card {
+    background: white;
+    margin: 18px 0;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+}
+
+
+body.escuro .card {
+    background: #242424;
+}
+
+
+.card h3 {
+    color: #2e7d32;
+    margin-bottom: 12px;
+}
+
+
+body.escuro .card h3 {
+    color: #66bb6a;
+}
+
+
+.card ul,
+.card ol {
+    margin-left: 25px;
+}
+
+
+.card li {
+    margin: 8px 0;
+}
+
+
+/* ÁREA DAS FÓRMULAS */
+
+.formula {
+    background: #e8f5e9;
+    padding: 15px;
+    border-left: 6px solid #2e7d32;
+    border-radius: 10px;
+    margin-top: 10px;
+}
+
+
+body.escuro .formula {
+    background: #18301b;
+}
+
+
+/* QUIZ */
+
+#quiz h2 {
+    text-align: center;
+    margin-bottom: 15px;
+}
+
+
+#contador {
+    text-align: center;
+    font-weight: bold;
+    margin: 15px;
+}
+
+
+/* BARRA DE PROGRESSO */
+
+.progresso {
+    width: 100%;
+    height: 22px;
+    background: #cccccc;
+    border-radius: 15px;
+    overflow: hidden;
+}
+
+
+#barra {
+    height: 100%;
+    width: 0%;
+    background: #2e7d32;
+    transition: 0.5s;
+}
+
+
+/* PERGUNTAS */
+
+#pergunta {
+    margin-top: 25px;
+    font-size: 20px;
+    font-weight: bold;
+}
+
+
+/* ALTERNATIVAS */
+
+#alternativas {
+    margin-top: 20px;
+}
+
+
+.opcao {
+    background: white;
+    margin-bottom: 12px;
+    padding: 15px;
+    border-radius: 10px;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: 0.2s;
+}
+
+
+body.escuro .opcao {
+    background: #242424;
+}
+
+
+.opcao:hover {
+    border-color: #2e7d32;
+}
+
+
+/* ALTERNATIVA SELECIONADA */
+
+.opcao.selecionada {
+    border: 2px solid #2e7d32;
+    font-weight: bold;
+}
+
+
+/* BOTÃO RESPONDER */
+
+#responder {
+    margin-top: 20px;
+    background: #2e7d32;
+    color: white;
+    border: none;
+    padding: 14px 25px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+
+#responder:hover {
+    opacity: 0.9;
+}
+
+
+/* RESULTADO DA QUESTÃO */
+
+#resultado {
+    margin-top: 20px;
+    padding: 15px;
+    border-radius: 10px;
+    font-weight: bold;
+    display: none;
+}
+
+
+/* ACERTO */
+
+.certo {
+    background: #d4edda;
+    color: #155724;
+    border: 2px solid #28a745;
+}
+
+
+/* ERRO */
+
+.errado {
+    background: #f8d7da;
+    color: #721c24;
+    border: 2px solid #dc3545;
+}
+
+
+/* RESULTADO FINAL */
+
+#final {
+    margin-top: 30px;
+    text-align: center;
+    font-size: 20px;
+    font-weight: bold;
+}
+
+
+/* RESPONSIVIDADE */
+
+@media (max-width: 600px) {
+
+    header h1 {
+        font-size: 20px;
+    }
+
+    .aba {
+        padding: 10px 15px;
+        font-size: 14px;
+    }
+
+    #pergunta {
+        font-size: 18px;
+    }
+
+    .opcao {
+        padding: 12px;
+    }
+
+}
+</style>
 
 <script>
-const allQuestions = [
-  // ===== MODELO OSI =====
-  { tag:'osi', q:'Quantas camadas possui o modelo OSI?', opts:['4','5','7','9'], ans:2, exp:'O modelo OSI possui 7 camadas: Física, Enlace, Rede, Transporte, Sessão, Apresentação e Aplicação.' },
-  { tag:'osi', q:'Qual é a camada responsável pelo roteamento de pacotes entre redes diferentes (ex: LAN para WAN)?', opts:['Camada 2 – Enlace','Camada 3 – Rede','Camada 4 – Transporte','Camada 5 – Sessão'], ans:1, exp:'A Camada 3 (Rede) realiza o roteamento de pacotes. Nela estão protocolos como IP, OSPF, BGP e RIP, além dos roteadores.' },
-  { tag:'osi', q:'A criptografia SSL/TLS é tratada em qual camada do modelo OSI?', opts:['Camada 4 – Transporte','Camada 5 – Sessão','Camada 6 – Apresentação','Camada 7 – Aplicação'], ans:2, exp:'A Camada 6 – Apresentação é responsável por criptografia (SSL/TLS), compressão e conversão de dados.' },
-  { tag:'osi', q:'Os protocolos TCP e UDP pertencem a qual camada do modelo OSI?', opts:['Camada 2 – Enlace','Camada 3 – Rede','Camada 4 – Transporte','Camada 5 – Sessão'], ans:2, exp:'TCP e UDP são protocolos da Camada 4 – Transporte, responsável pelo encapsulamento de dados em segmentos/datagramas.' },
-  { tag:'osi', q:'Qual das alternativas lista corretamente protocolos da Camada de Aplicação (Camada 7)?', opts:['IP, ICMP, ARP','TCP, UDP','HTTP, FTP, DNS, SMTP, DHCP','MAC, Ethernet, WiFi'], ans:2, exp:'A Camada 7 abriga protocolos de aplicação como HTTP (web), FTP (arquivos), DNS (nomes), SMTP (e-mail), DHCP (endereços), SSH, entre outros.' },
-  { tag:'osi', q:'Na camada de Enlace de Dados (Camada 2), os dados são organizados em qual unidade?', opts:['Bits','Pacotes','Segmentos','Frames (Quadros)'], ans:3, exp:'A camada de Enlace trabalha com frames (quadros). A camada de Transporte usa segmentos/datagramas, a Rede usa pacotes e a Física usa bits.' },
-  { tag:'osi', q:'O dispositivo "Switch" opera principalmente em qual camada do modelo OSI?', opts:['Camada 1','Camada 2','Camada 3','Camada 4'], ans:1, exp:'O Switch opera na Camada 2 (Enlace de Dados), tomando decisões com base no endereço MAC. Switches L3 também operam na Camada 3.' },
-  { tag:'osi', q:'Qual camada do OSI é responsável por estabelecer e encerrar sessões de comunicação entre aplicações?', opts:['Camada 4','Camada 5','Camada 6','Camada 7'], ans:1, exp:'A Camada 5 – Sessão gerencia o ciclo de vida das sessões de comunicação (início, manutenção e encerramento).' },
-  { tag:'osi', q:'A conversão de endereços lógicos (IP) em endereços físicos (MAC) ocorre em qual camada?', opts:['Camada 2 – Enlace','Camada 3 – Rede','Camada 4 – Transporte','Camada 1 – Física'], ans:1, exp:'A Camada 3 (Rede) realiza a conversão de endereços IP em endereços MAC, processo realizado pelo protocolo ARP.' },
-  { tag:'osi', q:'Qual protocolo da Camada 3 é utilizado para testar a conectividade entre hosts (comando "ping")?', opts:['HTTP','ARP','ICMP','BGP'], ans:2, exp:'O ICMP (Internet Control Message Protocol) é usado pelo comando ping para testar conectividade. Ele opera na Camada 3 (Rede).' },
+    // ===========================
+// CONTROLE DAS ABAS
+// ===========================
 
-  // ===== CAMADA FÍSICA =====
-  { tag:'fisica', q:'Qual é o modo de transmissão que permite comunicação bidirecional simultânea?', opts:['Simplex','Half Duplex','Full Duplex','Multicast'], ans:2, exp:'Full Duplex (FDX) permite transmissão e recepção simultâneas. Ex: telefone. Pode ser implementado com dois canais simplex ou multiplexação.' },
-  { tag:'fisica', q:'Uma transmissão de rádio ou televisão é um exemplo de qual modo de transmissão?', opts:['Full Duplex','Half Duplex','Simplex','Anycast'], ans:2, exp:'Simplex: comunicação em uma única direção. A estação transmite, o receptor apenas recebe, sem possibilidade de retorno pelo mesmo canal.' },
-  { tag:'fisica', q:'As redes WiFi utilizam qual modo de transmissão?', opts:['Full Duplex','Simplex','Half Duplex','Multicast'], ans:2, exp:'WiFi opera em Half Duplex (HDX) pois utiliza um único canal compartilhado, onde transmissão e recepção não ocorrem simultaneamente.' },
-  { tag:'fisica', q:'Qual tipo de cabo foi o PRIMEIRO utilizado em redes de computadores do tipo Ethernet?', opts:['Par trançado CAT5','Fibra óptica','Cabo coaxial','Cabo UTP CAT6'], ans:2, exp:'O cabo coaxial foi o primeiro utilizado em redes Ethernet. Hoje é considerado obsoleto para redes locais, mas ainda é usado em TV a cabo.' },
-  { tag:'fisica', q:'O cabo de par trançado tem seus condutores trançados com o objetivo principal de:', opts:['Aumentar a velocidade de transmissão','Reduzir interferência eletromagnética','Facilitar a instalação','Aumentar a distância máxima'], ans:1, exp:'O trançamento dos condutores cancela campos magnéticos externos, melhorando a compatibilidade eletromagnética e reduzindo ruídos.' },
-  { tag:'fisica', q:'Qual meio de transmissão utiliza pulsos de luz para transportar dados?', opts:['Par trançado','Cabo coaxial','Fibra óptica','Wireless'], ans:2, exp:'A fibra óptica usa pulsos de luz em núcleo de vidro ou plástico. Oferece alta velocidade, longa distância e imunidade a interferência eletromagnética.' },
-  { tag:'fisica', q:'Qual é a principal vantagem da transmissão wireless em relação aos meios guiados?', opts:['Maior velocidade de transmissão','Menor latência','Ausência de componente físico, conferindo flexibilidade','Maior segurança dos dados'], ans:2, exp:'A principal vantagem do wireless é eliminar a necessidade de cabos físicos, permitindo mobilidade e flexibilidade na conexão dos dispositivos.' },
-  { tag:'fisica', q:'Em uma rede Fast Ethernet com cabo de par trançado, qual é a velocidade máxima de transmissão?', opts:['10 Mbps','100 Mbps','1 Gbps','10 Gbps'], ans:1, exp:'Fast Ethernet atinge até 100 Mbps. Redes Gigabit Ethernet chegam a 1 Gbps e 10 Gigabit Ethernet a 10 Gbps.' },
-  { tag:'fisica', q:'Qual tipo de fibra óptica é mais adequado para longas distâncias?', opts:['Multimodo','Monomodo','Par trançado CAT8','Coaxial RG-6'], ans:1, exp:'Fibra monomodo possui núcleo menor e propaga apenas um modo de luz, sofrendo menos dispersão — ideal para longas distâncias. Multimodo é para curtas distâncias.' },
-  { tag:'fisica', q:'Qual a diferença entre Largura de Banda e Throughput?', opts:['São sinônimos','Largura de banda é a taxa real; throughput é a capacidade máxima teórica','Largura de banda é a capacidade máxima teórica; throughput é a taxa real transmitida','Largura de banda mede latência; throughput mede a distância'], ans:2, exp:'Largura de banda = capacidade máxima do canal (teórica). Throughput = taxa real de dados transmitidos com sucesso. Throughput é sempre ≤ largura de banda.' },
+function abrirAba(id) {
 
-  // ===== CAMADA DE ENLACE =====
-  { tag:'enlace', q:'A subcamada MAC da Camada de Enlace é responsável por:', opts:['Roteamento de pacotes entre redes','Estabelecer sessões TCP','Controlar como dispositivos compartilham o mesmo canal de transmissão','Criptografar os dados da camada de aplicação'], ans:2, exp:'MAC (Media Access Control) controla o acesso ao meio compartilhado, evitando colisões e gerenciando quem pode transmitir.' },
-  { tag:'enlace', q:'A subcamada LLC (Logical Link Control) tem como função:', opts:['Converter IPs em MACs','Estabelecer e manter enlaces lógicos entre dispositivos','Rotear pacotes entre redes','Comprimir os dados para transmissão'], ans:1, exp:'LLC estabelece e mantém os enlaces lógicos entre dispositivos na camada 2, provendo uma interface padronizada para as camadas superiores.' },
-  { tag:'enlace', q:'Uma Broadcast Storm (Tempestade de Broadcast) ocorre quando:', opts:['Muitos usuários acessam a Internet ao mesmo tempo','Há quantidade excessiva de tráfego de broadcast na rede','O roteador perde a tabela de rotas','A fibra óptica sofre atenuação excessiva'], ans:1, exp:'Broadcast Storm é causada por tráfego excessivo de broadcast, sobrecarregando os dispositivos e podendo paralisar a rede completamente.' },
+    document
+        .querySelectorAll(".conteudo")
+        .forEach(sec => sec.classList.remove("ativo"));
 
-  // ===== VLANs =====
-  { tag:'vlan', q:'O que é uma VLAN?', opts:['Uma rede WAN virtual','Uma rede local virtual que separa fisicamente uma rede em múltiplos domínios lógicos','Um protocolo de roteamento dinâmico','Um tipo de cabo de rede'], ans:1, exp:'VLAN (Virtual Local Area Network) permite criar múltiplas redes lógicas independentes sobre uma mesma infraestrutura física.' },
-  { tag:'vlan', q:'Quantos bits compõem o VLAN ID?', opts:['8 bits (0 a 255)','10 bits (0 a 1023)','12 bits (0 a 4094)','16 bits (0 a 65535)'], ans:2, exp:'O VLAN ID é um campo de 12 bits, permitindo valores de 0 a 4094 (total de 4096 VLANs possíveis).' },
-  { tag:'vlan', q:'Uma porta TRUNK em um switch tem a função de:', opts:['Conectar apenas um computador à rede','Transportar múltiplas VLANs simultaneamente entre switches','Bloquear o tráfego de broadcast','Conectar o switch ao roteador sem tag'], ans:1, exp:'Portas trunk transportam frames de múltiplas VLANs usando o protocolo 802.1q para identificar a qual VLAN cada frame pertence.' },
-  { tag:'vlan', q:'Qual protocolo é utilizado pelas portas trunk para identificar as VLANs?', opts:['802.11 (WiFi)','802.3 (Ethernet)','802.1q','STP (Spanning Tree)'], ans:2, exp:'O padrão IEEE 802.1q define o formato de tagging utilizado em portas trunk para identificar a qual VLAN cada frame pertence.' },
-  { tag:'vlan', q:'Uma porta de ACESSO (access port) em uma VLAN:', opts:['Transporta frames de múltiplas VLANs com tag','Pertence a apenas uma VLAN e opera sem tag (untagged)','Exige que o dispositivo conheça o VLAN ID','Usa o protocolo 802.1q para marcar frames'], ans:1, exp:'Portas de acesso pertencem a apenas uma VLAN e os frames são enviados sem tag — o dispositivo conectado não precisa conhecer o conceito de VLAN.' },
-  { tag:'vlan', q:'Qual é UMA das principais vantagens de usar VLANs em uma rede empresarial?', opts:['Elimina a necessidade de roteadores','Aumenta a largura de banda do cabo','Melhora a segurança ao isolar o tráfego em domínios distintos','Dispensa o uso de switches gerenciáveis'], ans:2, exp:'VLANs isolam o tráfego, dificultando o acesso não autorizado a recursos críticos e reduzindo o escopo de possíveis ataques na rede.' },
-  { tag:'vlan', q:'O que acontece com o domínio de broadcast ao criar múltiplas VLANs em um único switch?', opts:['O domínio de broadcast aumenta','O switch deixa de suportar broadcast','O domínio de broadcast é dividido em domínios menores e separados','Nada muda, pois VLANs não afetam o broadcast'], ans:2, exp:'Cada VLAN forma seu próprio domínio de broadcast. Isso reduz o tráfego desnecessário e diminui o uso de CPU dos dispositivos.' },
+    document
+        .querySelectorAll(".aba")
+        .forEach(btn => btn.classList.remove("ativa"));
 
-  // ===== CONCEITOS GERAIS / EXTRA =====
-  { tag:'extra', q:'Qual tipo de mensagem é enviada de um dispositivo para TODOS os dispositivos da rede?', opts:['Unicast','Multicast','Anycast','Broadcast'], ans:3, exp:'Broadcast envia a mensagem para todos os dispositivos na rede/segmento. É reconhecida por um endereço de broadcast especial.' },
-  { tag:'extra', q:'No endereçamento Anycast, a mensagem é entregue:', opts:['A todos os dispositivos da rede','A um grupo específico de dispositivos','Ao dispositivo mais próximo que oferece o serviço','Apenas ao dispositivo de destino especificado'], ans:2, exp:'Anycast roteia a mensagem para o nó mais próximo (em termos de roteamento) que pode atender a requisição. Muito usado em CDNs e DNS raiz.' },
-  { tag:'extra', q:'Qual é a diferença fundamental entre TCP e UDP?', opts:['TCP é mais rápido que UDP','TCP garante entrega e controle de erros; UDP não possui esses mecanismos','UDP é usado apenas em redes cabeadas','TCP opera apenas na Camada 2'], ans:1, exp:'TCP é orientado à conexão, com retransmissão e controle de erros. UDP é sem conexão, mais rápido mas sem garantia de entrega — ideal para streaming e VoIP.' },
-  { tag:'extra', q:'O que é latência em redes de computadores?', opts:['A taxa máxima de dados que um canal suporta','O tempo que um pacote leva para ir da origem ao destino','A quantidade de dados perdidos na transmissão','O número de dispositivos conectados à rede'], ans:1, exp:'Latência é o atraso de rede — o tempo que um pacote demora para percorrer o caminho entre origem e destino. Medida em milissegundos (ms).' },
-  { tag:'extra', q:'Uma rede que cobre uma única cidade é classificada como:', opts:['LAN','WAN','MAN','PAN'], ans:2, exp:'MAN (Metropolitan Area Network) cobre uma cidade ou área metropolitana. LAN é local (edifício/campus), WAN é de longa distância e PAN é pessoal (ex: Bluetooth).' },
-  { tag:'extra', q:'O protocolo DHCP, presente na Camada de Aplicação, tem qual função principal?', opts:['Traduzir nomes de domínio em endereços IP','Enviar e-mails entre servidores','Atribuir automaticamente endereços IP aos dispositivos da rede','Criptografar o tráfego HTTP'], ans:2, exp:'DHCP (Dynamic Host Configuration Protocol) distribui automaticamente configurações de rede aos clientes, incluindo endereço IP, máscara, gateway e DNS.' },
-  { tag:'extra', q:'O QoS (Quality of Service) mencionado na Camada de Rede serve para:', opts:['Criptografar os pacotes','Priorizar determinados tipos de tráfego na rede','Comprimir dados para economizar banda','Converter endereços IPv4 em IPv6'], ans:1, exp:'QoS permite definir prioridades de tráfego, garantindo melhor desempenho para serviços críticos (como VoIP ou videoconferência) em relação a outros tipos de dados.' },
+    document
+        .getElementById(id)
+        .classList.add("ativo");
+
+    event.target.classList.add("ativa");
+}
+
+
+// ===========================
+// MODO ESCURO / CLARO
+// ===========================
+
+const temaBtn = document.getElementById("tema");
+
+temaBtn.addEventListener("click", () => {
+
+    document.body.classList.toggle("escuro");
+    document.body.classList.toggle("claro");
+
+    if(document.body.classList.contains("escuro")){
+        temaBtn.innerHTML = "☀️ Modo Claro";
+    } else {
+        temaBtn.innerHTML = "🌙 Modo Escuro";
+    }
+
+});
+
+
+// ===========================
+// QUESTÕES
+// ===========================
+
+const questoes = [
+
+{
+pergunta:
+"1) Qual é o principal objetivo da Assistência Técnica e Extensão Rural (ATER)?",
+
+alternativas:[
+"Apenas aumentar a produção agrícola",
+"Fiscalizar propriedades rurais",
+"Promover desenvolvimento sustentável, produtividade, gestão e qualidade de vida",
+"Substituir o trabalho do produtor"
+],
+
+correta:2,
+
+explicacao:
+"A ATER atua como ponte entre o conhecimento técnico e os produtores, promovendo desenvolvimento sustentável, produtividade, gestão eficiente e qualidade de vida."
+},
+
+{
+pergunta:
+"2) No modelo participativo de ATER, o produtor rural é considerado:",
+
+alternativas:[
+"Um receptor passivo de informações",
+"Um agente ativo na tomada de decisões",
+"Um funcionário da assistência técnica",
+"Um observador das ações técnicas"
+],
+
+correta:1,
+
+explicacao:
+"No modelo participativo, o produtor participa ativamente das decisões relacionadas à propriedade."
+},
+
+{
+pergunta:
+"3) Qual modelo de ATER era baseado principalmente na transferência de tecnologia?",
+
+alternativas:[
+"Modelo participativo",
+"Modelo híbrido",
+"Modelo difusionista",
+"Modelo cooperativista"
+],
+
+correta:2,
+
+explicacao:
+"O modelo difusionista tinha foco na transferência de tecnologia dos técnicos para os produtores."
+},
+
+{
+pergunta:
+"4) Qual instituição define as diretrizes da ATER no Brasil?",
+
+alternativas:[
+"Pronaf",
+"Pnater",
+"Anater",
+"PNAE"
+],
+
+correta:1,
+
+explicacao:
+"A Pnater é responsável pelas diretrizes que orientam a Assistência Técnica e Extensão Rural."
+},
+
+{
+pergunta:
+"5) Qual é a função principal da Anater?",
+
+alternativas:[
+"Oferecer crédito rural",
+"Articular os serviços de ATER",
+"Fiscalizar cooperativas",
+"Emitir o CAF"
+],
+
+correta:1,
+
+explicacao:
+"A Anater atua articulando e integrando os serviços de assistência técnica e extensão rural."
+},
+
+{
+pergunta:
+"6) Quais dimensões são analisadas em uma propriedade rural pela ATER?",
+
+alternativas:[
+"Produtiva, econômica, social e ambiental",
+"Financeira, jurídica e tributária",
+"Industrial, comercial e financeira",
+"Social, política e cultural"
+],
+
+correta:0,
+
+explicacao:
+"A análise da propriedade considera aspectos produtivos, econômicos, sociais e ambientais."
+},
+
+{
+pergunta:
+"7) A sustentabilidade envolve equilíbrio entre quais dimensões?",
+
+alternativas:[
+"Econômica, social, ambiental e cultural",
+"Financeira, tecnológica e política",
+"Produtiva, industrial e comercial",
+"Social, financeira e tributária"
+],
+
+correta:0,
+
+explicacao:
+"A sustentabilidade busca equilibrar aspectos econômicos, sociais, ambientais e culturais."
+},
+
+{
+pergunta:
+"8) Qual é um exemplo de modelo público estatal de ATER?",
+
+alternativas:[
+"Cooperativas",
+"Empresas de insumos",
+"Emater",
+"AgTechs"
+],
+
+correta:2,
+
+explicacao:
+"A Emater é um dos principais exemplos de assistência técnica pública estatal."
+},
+
+{
+pergunta:
+"9) O modelo híbrido de assistência técnica é representado por:",
+
+alternativas:[
+"Pronaf",
+"ATeG/Senar",
+"PAA",
+"CAF"
+],
+
+correta:1,
+
+explicacao:
+"A ATeG combina assistência técnica com gestão da propriedade rural."
+},
+
+{
+pergunta:
+"10) Qual metodologia da ATER consiste em visitas realizadas diretamente na propriedade?",
+
+alternativas:[
+"Curso",
+"Excursão técnica",
+"Visita técnica",
+"Palestra"
+],
+
+correta:2,
+
+explicacao:
+"A visita técnica permite observar a realidade da propriedade e orientar o produtor."
+},
+
+{
+pergunta:
+"11) O Diagnóstico Rural Participativo (DRP) tem como característica principal:",
+
+alternativas:[
+"Tomada de decisão exclusiva do técnico",
+"Participação dos produtores na identificação de problemas e soluções",
+"Fiscalização da propriedade",
+"Controle financeiro obrigatório"
+],
+
+correta:1,
+
+explicacao:
+"O DRP valoriza a participação dos produtores na construção das soluções."
+},
+
+{
+pergunta:
+"12) O Pronaf é um programa destinado a:",
+
+alternativas:[
+"Financiar a agricultura familiar",
+"Comprar merenda escolar",
+"Emitir documentos rurais",
+"Controlar exportações"
+],
+
+correta:0,
+
+explicacao:
+"O Pronaf oferece linhas de financiamento para agricultores familiares."
+},
+
+{
+pergunta:
+"13) O Programa de Aquisição de Alimentos é conhecido pela sigla:",
+
+alternativas:[
+"PNAE",
+"Pnater",
+"PAA",
+"CAF"
+],
+
+correta:2,
+
+explicacao:
+"O PAA realiza a compra de alimentos produzidos pela agricultura familiar."
+},
+
+{
+pergunta:
+"14) O PNAE está relacionado principalmente à:",
+
+alternativas:[
+"Exportação agrícola",
+"Merenda escolar",
+"Produção de insumos",
+"Capacitação técnica"
+],
+
+correta:1,
+
+explicacao:
+"O PNAE adquire alimentos da agricultura familiar para alimentação escolar."
+},
+
+{
+pergunta:
+"15) O CAF é obrigatório para:",
+
+alternativas:[
+"Obter licença ambiental",
+"Acessar programas públicos voltados à agricultura familiar",
+"Registrar imóveis urbanos",
+"Participar de exportações"
+],
+
+correta:1,
+
+explicacao:
+"O Cadastro Nacional da Agricultura Familiar é requisito para acesso a diversos programas públicos."
+},
+
+{
+pergunta:
+"16) Qual fator influencia o mercado agropecuário?",
+
+alternativas:[
+"Clima",
+"Câmbio",
+"Mercado internacional",
+"Todas as alternativas"
+],
+
+correta:3,
+
+explicacao:
+"O mercado agropecuário sofre influência de diversos fatores internos e externos."
+},
+
+{
+pergunta:
+"17) Commodities são caracterizadas por:",
+
+alternativas:[
+"Foco em volume e custo",
+"Foco exclusivo em certificações",
+"Produção artesanal",
+"Mercado local restrito"
+],
+
+correta:0,
+
+explicacao:
+"As commodities priorizam escala produtiva e competitividade de custos."
+},
+
+{
+pergunta:
+"18) Mercados de nicho normalmente valorizam:",
+
+alternativas:[
+"Somente volume",
+"Qualidade, certificação e valor agregado",
+"Baixo preço apenas",
+"Produção em massa"
+],
+
+correta:1,
+
+explicacao:
+"Produtos de nicho geralmente recebem maior valor devido à diferenciação."
+},
+
+{
+pergunta:
+"19) Qual das opções representa uma oportunidade profissional para técnicos da área?",
+
+alternativas:[
+"AgTechs",
+"Cooperativas",
+"Consultoria privada",
+"Todas as alternativas"
+],
+
+correta:3,
+
+explicacao:
+"Existem diversas oportunidades profissionais ligadas ao setor agropecuário."
+},
+
+{
+pergunta:
+"20) O uso de drones e sensores está relacionado à:",
+
+alternativas:[
+"Agricultura e pecuária de precisão",
+"Produção artesanal",
+"Comércio internacional",
+"Legislação ambiental"
+],
+
+correta:0,
+
+explicacao:
+"Drones e sensores auxiliam a coleta de dados para decisões mais precisas."
+},
+
+{
+pergunta:
+"21) A comunicação verbal refere-se principalmente:",
+
+alternativas:[
+"À linguagem corporal",
+"À expressão por palavras faladas ou escritas",
+"Apenas a gestos",
+"Apenas à aparência"
+],
+
+correta:1,
+
+explicacao:
+"A comunicação verbal utiliza palavras para transmitir informações."
+},
+
+{
+pergunta:
+"22) A escuta ativa consiste em:",
+
+alternativas:[
+"Ouvir sem prestar atenção",
+"Escutar e compreender o interlocutor",
+"Interromper constantemente",
+"Discordar automaticamente"
+],
+
+correta:1,
+
+explicacao:
+"A escuta ativa busca compreender a mensagem transmitida pelo interlocutor."
+},
+
+{
+pergunta:
+"23) A adaptação da linguagem ao público rural tem como objetivo:",
+
+alternativas:[
+"Facilitar a compreensão",
+"Impressionar o produtor",
+"Utilizar termos complexos",
+"Evitar diálogo"
+],
+
+correta:0,
+
+explicacao:
+"A comunicação deve ser adequada ao público para garantir entendimento."
+},
+
+{
+pergunta:
+"24) A ética profissional envolve:",
+
+alternativas:[
+"Responsabilidade e respeito",
+"Manipulação de informações",
+"Interesses pessoais acima do coletivo",
+"Falta de transparência"
+],
+
+correta:0,
+
+explicacao:
+"A ética orienta comportamentos responsáveis e transparentes."
+},
+
+{
+pergunta:
+"25) Uma característica importante da liderança é:",
+
+alternativas:[
+"Impor decisões sem diálogo",
+"Inspirar e orientar equipes",
+"Evitar responsabilidades",
+"Trabalhar sozinho"
+],
+
+correta:1,
+
+explicacao:
+"O líder contribui para o alcance de objetivos e desenvolvimento da equipe."
+},
+
+{
+pergunta:
+"26) A mediação de conflitos busca:",
+
+alternativas:[
+"Aumentar divergências",
+"Resolver problemas por meio do diálogo",
+"Punir envolvidos",
+"Ignorar os conflitos"
+],
+
+correta:1,
+
+explicacao:
+"A mediação procura soluções equilibradas e construtivas."
+},
+
+{
+pergunta:
+"27) O que significa atualização contínua?",
+
+alternativas:[
+"Parar de estudar após a formação",
+"Buscar constantemente novos conhecimentos",
+"Evitar tecnologias",
+"Manter métodos antigos"
+],
+
+correta:1,
+
+explicacao:
+"O profissional deve acompanhar mudanças e inovações do setor."
+},
+
+{
+pergunta:
+"28) O diagnóstico da propriedade rural envolve:",
+
+alternativas:[
+"Levantamento dos processos produtivos",
+"Apenas análise financeira",
+"Apenas análise ambiental",
+"Somente observação visual"
+],
+
+correta:0,
+
+explicacao:
+"O diagnóstico considera informações amplas sobre a propriedade."
+},
+
+{
+pergunta:
+"29) O ciclo PDCA significa:",
+
+alternativas:[
+"Planejar, Fazer, Verificar e Agir",
+"Planejar, Desenvolver, Controlar e Avaliar",
+"Produzir, Distribuir, Comercializar e Analisar",
+"Pesquisar, Desenvolver, Controlar e Aplicar"
+],
+
+correta:0,
+
+explicacao:
+"O PDCA é uma ferramenta de melhoria contínua composta por Planejar, Fazer, Verificar e Agir."
+},
+
+{
+pergunta:
+"30) A ferramenta 5W3H é utilizada para:",
+
+alternativas:[
+"Planejamento e organização de ações",
+"Controle climático",
+"Produção agrícola",
+"Fiscalização ambiental"
+],
+
+correta:0,
+
+explicacao:
+"O 5W3H auxilia na definição de ações, responsabilidades e prazos."
+},
+
+{
+pergunta:
+"31) A avaliação de desempenho técnico e econômico serve para:",
+
+alternativas:[
+"Medir resultados da propriedade",
+"Substituir o produtor",
+"Controlar apenas funcionários",
+"Registrar documentos"
+],
+
+correta:0,
+
+explicacao:
+"A avaliação permite identificar pontos fortes e oportunidades de melhoria."
+},
+
+{
+pergunta:
+"32) A agricultura sustentável busca:",
+
+alternativas:[
+"Produção sem preocupação ambiental",
+"Equilíbrio entre produção e conservação dos recursos",
+"Apenas aumento da produtividade",
+"Redução da tecnologia"
+],
+
+correta:1,
+
+explicacao:
+"A agricultura sustentável preserva recursos naturais e mantém a produção."
+},
+
+{
+pergunta:
+"33) A integração lavoura-pecuária consiste em:",
+
+alternativas:[
+"Separar atividades agrícolas e pecuárias",
+"Integrar produção agrícola e pecuária na mesma área",
+"Produzir apenas grãos",
+"Criar apenas animais"
+],
+
+correta:1,
+
+explicacao:
+"A integração melhora o uso dos recursos e a sustentabilidade."
+},
+
+{
+pergunta:
+"34) A rotação de culturas contribui para:",
+
+alternativas:[
+"Melhoria do solo e redução de pragas",
+"Aumento exclusivo dos custos",
+"Desgaste do solo",
+"Redução da produtividade"
+],
+
+correta:0,
+
+explicacao:
+"A rotação ajuda a conservar o solo e reduzir problemas fitossanitários."
+},
+
+{
+pergunta:
+"35) O controle integrado de pragas tem como objetivo:",
+
+alternativas:[
+"Eliminar toda forma de vida",
+"Controlar pragas de forma sustentável",
+"Usar apenas defensivos químicos",
+"Abandonar o monitoramento"
+],
+
+correta:1,
+
+explicacao:
+"O manejo integrado combina diferentes estratégias para controlar pragas."
+},
+
+{
+pergunta:
+"36) A gestão correta de resíduos e embalagens contribui para:",
+
+alternativas:[
+"Aumento da poluição",
+"Sustentabilidade ambiental",
+"Desperdício de recursos",
+"Redução da segurança"
+],
+
+correta:1,
+
+explicacao:
+"O manejo adequado reduz impactos ambientais."
+},
+
+{
+pergunta:
+"37) A segurança do trabalho rural visa:",
+
+alternativas:[
+"Prevenir acidentes e riscos ocupacionais",
+"Aumentar riscos",
+"Reduzir produtividade",
+"Eliminar treinamentos"
+],
+
+correta:0,
+
+explicacao:
+"A segurança protege trabalhadores e melhora as condições de trabalho."
+},
+
+{
+pergunta:
+"38) Os indicadores produtivos, econômicos e ambientais são utilizados para:",
+
+alternativas:[
+"Monitorar resultados e desempenho",
+"Substituir relatórios",
+"Controlar apenas receitas",
+"Controlar apenas produção"
+],
+
+correta:0,
+
+explicacao:
+"Os indicadores auxiliam o acompanhamento da evolução da propriedade."
+},
+
+{
+pergunta:
+"39) A elaboração de relatórios técnicos é importante porque:",
+
+alternativas:[
+"Documenta informações e resultados",
+"Substitui o monitoramento",
+"Dispensa coleta de dados",
+"Evita transparência"
+],
+
+correta:0,
+
+explicacao:
+"Os relatórios registram informações importantes para análise e tomada de decisão."
+},
+
+{
+pergunta:
+"40) A melhoria contínua depende principalmente de:",
+
+alternativas:[
+"Feedback, monitoramento e capacitação contínua",
+"Apenas investimentos financeiros",
+"Somente aumento da produção",
+"Redução do controle"
+],
+
+correta:0,
+
+explicacao:
+"A melhoria contínua ocorre por meio da avaliação constante, correções e aprendizado permanente."
+}
+
 ];
+// ===========================
+// VARIÁVEIS DO QUIZ
+// ===========================
 
-let currentQ = 0;
-let answered = 0;
-let correct = 0;
-let filtered = [];
-let activeFilter = 'all';
-let questionAnswered = false;
+let indice = 0;
+let acertos = 0;
+let selecionada = null;
 
-function setFilter(f) {
-  activeFilter = f;
-  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-  event.target.classList.add('active');
-  startQuiz();
+
+// Elementos da página
+
+const pergunta = document.getElementById("pergunta");
+const alternativas = document.getElementById("alternativas");
+const botao = document.getElementById("responder");
+const resultado = document.getElementById("resultado");
+const contador = document.getElementById("contador");
+const barra = document.getElementById("barra");
+const final = document.getElementById("final");
+
+
+// ===========================
+// MOSTRAR QUESTÕES
+// ===========================
+
+function carregarQuestao() {
+
+    resultado.style.display = "none";
+    resultado.className = "";
+    selecionada = null;
+
+    let q = questoes[indice];
+
+    contador.innerHTML =
+    `Questão ${indice + 1} de ${questoes.length}`;
+
+    barra.style.width =
+    `${(indice / questoes.length) * 100}%`;
+
+
+    pergunta.innerHTML = q.pergunta;
+
+    alternativas.innerHTML = "";
+
+
+    q.alternativas.forEach((item, i) => {
+
+        let div = document.createElement("div");
+
+        div.className = "opcao";
+
+        div.innerHTML = item;
+
+
+        div.onclick = function() {
+
+            document
+            .querySelectorAll(".opcao")
+            .forEach(op => {
+                op.classList.remove("selecionada");
+            });
+
+            div.classList.add("selecionada");
+
+            selecionada = i;
+
+        };
+
+
+        alternativas.appendChild(div);
+
+    });
+
+
 }
 
-function startQuiz() {
-  filtered = activeFilter === 'all' ? [...allQuestions] : allQuestions.filter(q => q.tag === activeFilter);
-  // shuffle
-  for (let i = filtered.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i+1));
-    [filtered[i], filtered[j]] = [filtered[j], filtered[i]];
-  }
-  currentQ = 0; answered = 0; correct = 0;
-  document.getElementById('result-container').style.display = 'none';
-  document.getElementById('quiz-container').style.display = 'block';
-  document.getElementById('filter-bar').style.display = 'flex';
-  document.getElementById('quiz-actions').style.display = 'flex';
-  renderQuestion();
+
+// ===========================
+// RESPONDER QUESTÃO
+// ===========================
+
+
+botao.addEventListener("click", function() {
+
+
+    if(selecionada === null){
+
+        alert("Escolha uma alternativa antes de responder!");
+
+        return;
+    }
+
+
+    let q = questoes[indice];
+
+
+    resultado.style.display = "block";
+
+
+    if(selecionada === q.correta){
+
+
+        acertos++;
+
+        resultado.className = "certo";
+
+
+        resultado.innerHTML = `
+        🟢 CERTO! <br><br>
+        ${q.explicacao}
+        `;
+
+
+    } else {
+
+
+        resultado.className = "errado";
+
+
+        resultado.innerHTML = `
+        🔴 ERRADO! <br><br>
+        ${q.explicacao}
+        `;
+
+
+    }
+
+
+    // Desativa novas escolhas
+    document
+    .querySelectorAll(".opcao")
+    .forEach(op => {
+
+        op.style.pointerEvents = "none";
+
+    });
+
+
+
+    // Aguarda e passa para próxima questão
+
+    setTimeout(() => {
+
+
+        indice++;
+
+
+        if(indice < questoes.length){
+
+
+            carregarQuestao();
+
+
+        } else {
+
+
+            mostrarResultadoFinal();
+
+        }
+
+
+    }, 3000);
+
+
+});
+
+
+
+
+// ===========================
+// RESULTADO FINAL
+// ===========================
+
+
+function mostrarResultadoFinal(){
+
+
+    pergunta.innerHTML =
+    "🎉 Quiz concluído!";
+
+
+    alternativas.innerHTML = "";
+
+
+    botao.style.display = "none";
+
+
+    resultado.style.display = "none";
+
+
+    barra.style.width = "100%";
+
+
+    let nota =
+    (acertos / questoes.length) * 100;
+
+
+    let mensagem = "";
+
+
+    if (nota == 100) {
+        mensagem = 
+        "🏆🏆🏆 Incrivel, você é nota 1000! 🏆🏆🏆";
+    }
+
+    else if(nota >= 90){
+
+        mensagem =
+        "🏆 Excelente! Seu domínio do conteúdo está ótimo.";
+
+    }
+
+    else if(nota >= 70){
+
+        mensagem =
+        "✅ Bom desempenho! Continue revisando os detalhes.";
+
+    }
+
+    else if(nota >= 50){
+
+        mensagem =
+        "⚠️ Desempenho regular. Revise os assuntos com mais atenção.";
+
+    }
+
+    else if(nota == 0){
+
+        mensagem =
+        "⚠️⚠️⚠️ Incrivel, você conseguiu a proeza de errar todas! ⚠️⚠️⚠️ <br> Não é algo bom, mas é incrivel mesmo assim!!";
+
+    }
+
+    else {
+
+        mensagem =
+        "📚 É necessário estudar novamente o conteúdo.";
+
+    }
+
+
+    final.innerHTML = `
+
+        <h2>Resultado Final</h2>
+
+        <p>
+        Você acertou <strong>${acertos}</strong>
+        de <strong>${questoes.length}</strong> questões.
+        </p>
+
+        <p>
+        Sua nota foi:
+        <strong>${nota.toFixed(1)}/100</strong>
+        </p>
+
+        <br>
+
+        <p>${mensagem}</p>
+
+    `;
+
+
 }
 
-function renderQuestion() {
-  if (currentQ >= filtered.length) { showResult(); return; }
-  questionAnswered = false;
-  const q = filtered[currentQ];
-  const container = document.getElementById('quiz-container');
-  const letters = ['A','B','C','D','E'];
-  const tagLabels = {osi:'OSI',fisica:'Física',enlace:'Enlace',vlan:'VLAN',extra:'Geral'};
-  const tagColors = {osi:'blue',fisica:'green',enlace:'purple',vlan:'orange',extra:''};
 
-  container.innerHTML = `
-    <div class="question-card">
-      <div class="question-num">
-        <span class="tag ${tagColors[q.tag]||''}">${tagLabels[q.tag]||q.tag}</span>
-        &nbsp; Questão ${currentQ+1} de ${filtered.length}
-      </div>
-      <div class="question-text">${q.q}</div>
-      <div class="options" id="opts">
-        ${q.opts.map((o,i)=>`
-          <div class="option" id="opt${i}" onclick="answer(${i})">
-            <span class="opt-letter">${letters[i]})</span>
-            <span>${o}</span>
-          </div>
-        `).join('')}
-      </div>
-      <div class="feedback" id="feedback"></div>
-    </div>
-  `;
-  updateProgress();
-  document.getElementById('btn-next').style.display = 'none';
-  document.getElementById('btn-finish').style.display = 'none';
-}
+// ===========================
+// INICIAR QUIZ
+// ===========================
 
-function answer(idx) {
-  if (questionAnswered) return;
-  questionAnswered = true;
-  answered++;
-  const q = filtered[currentQ];
-  const opts = document.querySelectorAll('.option');
-  opts.forEach(o => o.classList.add('disabled'));
-  const fb = document.getElementById('feedback');
 
-  if (idx === q.ans) {
-    correct++;
-    opts[idx].classList.add('correct');
-    fb.className = 'feedback show correct';
-    fb.textContent = '✅ Correto! ' + q.exp;
-  } else {
-    opts[idx].classList.add('wrong');
-    opts[q.ans].classList.add('correct');
-    fb.className = 'feedback show wrong';
-    fb.textContent = '❌ Incorreto. ' + q.exp;
-  }
-  updateProgress();
+carregarQuestao();
 
-  if (currentQ < filtered.length - 1) {
-    document.getElementById('btn-next').style.display = 'inline-flex';
-  } else {
-    document.getElementById('btn-finish').style.display = 'inline-flex';
-  }
-}
-
-function nextQuestion() {
-  currentQ++;
-  document.getElementById('btn-next').style.display = 'none';
-  document.getElementById('btn-finish').style.display = 'none';
-  renderQuestion();
-}
-
-function showResult() {
-  const pct = Math.round((correct / filtered.length) * 100);
-  let emoji = pct >= 80 ? '🏆' : pct >= 60 ? '😊' : pct >= 40 ? '😅' : '📚';
-  let msg = pct >= 80 ? 'Excelente! Continue assim!' : pct >= 60 ? 'Bom resultado! Revise os erros.' : pct >= 40 ? 'Precisa praticar mais. Revise o material!' : 'Hora de rever a teoria com calma!';
-  document.getElementById('quiz-container').style.display = 'none';
-  document.getElementById('filter-bar').style.display = 'none';
-  document.getElementById('quiz-actions').style.display = 'none';
-  const rc = document.getElementById('result-container');
-  rc.style.display = 'block';
-  rc.innerHTML = `
-    <div class="result-box">
-      <div style="font-size:3rem">${emoji}</div>
-      <div class="big-score">${correct}/${filtered.length}</div>
-      <p style="font-size:1.1rem;font-weight:700;margin-top:4px;color:var(--text)">${pct}% de acerto</p>
-      <p style="margin-top:8px">${msg}</p>
-      <div class="actions">
-        <button class="btn" onclick="startQuiz()">🔄 Tentar novamente</button>
-        <button class="btn secondary" onclick="showPage('revisao')">📖 Revisar material</button>
-      </div>
-    </div>
-  `;
-}
-
-function updateProgress() {
-  const pct = filtered.length ? (answered / filtered.length) * 100 : 0;
-  document.getElementById('prog').style.width = pct + '%';
-  document.getElementById('score-badge').textContent = correct + ' / ' + answered;
-}
-
-function showPage(p) {
-  document.querySelectorAll('.page').forEach(el => el.classList.remove('active'));
-  document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
-  document.getElementById(p).classList.add('active');
-  document.querySelectorAll('.tab').forEach(t => { if(t.textContent.toLowerCase().includes(p === 'revisao' ? 'revisão' : 'questões')) t.classList.add('active'); });
-  if (p === 'quiz' && filtered.length === 0) startQuiz();
-}
-
-// init
-startQuiz();
 </script>
+
 </body>
 </html>
