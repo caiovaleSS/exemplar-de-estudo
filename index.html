@@ -578,6 +578,16 @@ Taxa de retorno = (Lucro ÷ Capital investido) × 100
 
 
     </main>
+
+    <footer id="rodape">
+        <button id="tenteNovamente" onclick="recarregaPagina()">
+            <strong>
+                <a href="https://caiovaless.github.io/exemplar-de-estudo/" style="text-decoration: none; color: white">
+                    Início
+                </a>
+            </strong>
+        </button>
+    </footer>
     <style>
         /* RESET GERAL */
 
@@ -659,6 +669,25 @@ Taxa de retorno = (Lucro ÷ Capital investido) × 100
             gap: 15px;
             padding: 15px;
             background: #d9eadb;
+        }
+
+        /* RODAPE */
+        footer {
+            display: flex;
+            justify-content: center;
+            height: 300%;
+            padding: 30px;
+            background: #d9eadb;
+        }
+
+        #tenteNovamente {
+            background: #2e7d32;
+            color: white;
+            padding: 14px 25px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            text-decoration: none;
         }
 
 
@@ -936,10 +965,23 @@ Taxa de retorno = (Lucro ÷ Capital investido) × 100
                 padding: 12px;
             }
 
+            #avancar {
+                margin-left: 24.5%;
+            }
+
         }
     </style>
 
     <script>
+
+        // ===========================
+        // RECARREGA A PAGINA
+        // ===========================
+
+        function recarregarPagina() {
+            location.reload();
+        }
+
         // ===========================
         // CONTROLE DAS ABAS
         // ===========================
@@ -1688,6 +1730,7 @@ Taxa de retorno = (Lucro ÷ Capital investido) × 100
         const contador = document.getElementById("contador");
         const barra = document.getElementById("barra");
         const final = document.getElementById("final");
+        const recarrega = document.getElementById("tenteNovamente");
 
 
         // ===========================
@@ -1891,7 +1934,6 @@ Taxa de retorno = (Lucro ÷ Capital investido) × 100
 
             botaoAvancar.style.display = "none";
 
-
             resultado.style.display = "none";
 
 
@@ -1907,41 +1949,41 @@ Taxa de retorno = (Lucro ÷ Capital investido) × 100
 
             if (nota == 100) {
                 mensagem =
-                    "🏆🏆🏆 Incrivel, você é nota 1000! 🏆🏆🏆 <br><br><br> Recarregue a pagina para tentar de novamente!!!";
+                    "🏆🏆🏆 Incrivel, você é nota 1000! 🏆🏆🏆 <br><br><br> Tente de novamente! <br> Clicando abaixo.";
             }
 
             else if (nota >= 90) {
 
                 mensagem =
-                    "🏆 Excelente! Seu domínio do conteúdo está ótimo. <br><br><br> Recarregue a pagina para tentar de novamente!!!";
+                    "🏆 Excelente! Seu domínio do conteúdo está ótimo. <br><br><br> Tente de novamente! <br> Clicando abaixo.";
 
             }
 
             else if (nota >= 70) {
 
                 mensagem =
-                    "✅ Bom desempenho! Continue revisando os detalhes. <br><br><br> Recarregue a pagina para tentar de novamente!!!";
+                    "✅ Bom desempenho! Continue revisando os detalhes. <br><br><br> Tente de novamente! <br> Clicando abaixo.";
 
             }
 
             else if (nota >= 50) {
 
                 mensagem =
-                    "⚠️ Desempenho regular. Revise os assuntos com mais atenção. <br><br><br> Recarregue a pagina para tentar de novamente!!!";
+                    "⚠️ Desempenho regular. Revise os assuntos com mais atenção. <br><br><br> Tente de novamente! <br> Clicando abaixo.";
 
             }
 
             else if (nota == 0) {
 
                 mensagem =
-                    "⚠️⚠️⚠️ Incrivel, você conseguiu a proeza de errar todas! ⚠️⚠️⚠️ <br>⚠️⚠️⚠️ Não é algo bom, mas ainda é muito incrivel!! ⚠️⚠️⚠️ <br><br><br> Recarregue a pagina para tentar de novamente!!!";
+                    "⚠️⚠️⚠️ Incrivel ⚠️⚠️⚠️<br> Você conseguiu errar todas! <br><br><br> Tente de novamente! <br> Clicando abaixo.";
 
             }
 
             else {
 
                 mensagem =
-                    "📚 É necessário estudar novamente o conteúdo. <br><br><br> Recarregue a pagina para tentar de novamente!!!📚";
+                    "📚 É necessário estudar novamente o conteúdo. 📚 <br><br><br> Tente de novamente! <br> Clicando abaixo.";
 
             }
 
